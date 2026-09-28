@@ -1,6 +1,6 @@
 package com.clinique.gestion_clinique.repository;
 
-import com.clinique.gestion_clinique.model.Utilisateur;
+import com.clinique.gestion_clinique.entity.Utilisateur;
 import java.util.Optional;
 
 /** Contrat d'accès aux données des utilisateurs. */

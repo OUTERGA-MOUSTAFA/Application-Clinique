@@ -1,6 +1,6 @@
 package com.clinique.gestion_clinique.repository;
 
-import com.clinique.gestion_clinique.model.Patient;
+import com.clinique.gestion_clinique.entity.Patient;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;

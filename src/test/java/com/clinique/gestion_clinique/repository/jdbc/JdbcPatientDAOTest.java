@@ -4,8 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.clinique.gestion_clinique.model.Patient;
-import java.math.BigDecimal;
+import com.clinique.gestion_clinique.entity.Patient;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -76,7 +75,7 @@ class JdbcPatientDAOTest {
         patient.setNumSecu("1234567890123");
         patient.setTension("120/80");
         patient.setFrequenceCardiaque(72);
-        patient.setTemperature(new BigDecimal("36.60"));
+        patient.setTemperature(36.60);
         patient.setFrequenceRespiratoire(16);
         patient.setHeureArrivee(heureArrivee);
         patient.setStatut("EN_ATTENTE");

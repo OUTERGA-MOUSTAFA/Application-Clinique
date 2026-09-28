@@ -1,6 +1,6 @@
 package com.clinique.gestion_clinique.repository;
 
-import com.clinique.gestion_clinique.model.Consultation;
+import com.clinique.gestion_clinique.entity.Consultation;
 import java.util.List;
 import java.util.Optional;
 

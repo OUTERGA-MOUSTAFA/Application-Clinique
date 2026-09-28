@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class TestController {
 
-    @GetMapping("/")
-    public String index() {
-        return "Bienvenue sur l'application de Gestion de Clinique !";
-    }
+    // @GetMapping("/")
+    // public String index() {
+    //     return "Bienvenue sur l'application de Gestion de Clinique !";
+    // }
 }

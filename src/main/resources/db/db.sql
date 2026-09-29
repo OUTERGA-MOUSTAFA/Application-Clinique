@@ -41,3 +41,18 @@ CREATE TABLE consultation (
     CONSTRAINT fk_consultation_patient FOREIGN KEY (patient_id) REFERENCES patient(id),
     CONSTRAINT fk_consultation_medecin FOREIGN KEY (medecin_id) REFERENCES utilisateur(id)
 );
+-- entre des comptes par defaut de nurse et doctor
+INSERT INTO utilisateur (nom, email, mot_de_passe, role) 
+VALUES 
+(
+    'Infirmier Test', 
+    'infirmier@clinique.com', 
+    '$2a$10$e8R5qQW3h4L.OaYqW8/R4.uPq5Yh7GqI7k8Y3e7l5O7S9/mKz2/2i', 
+    'INFIRMIER'
+),
+(
+    'Medecin Test', 
+    'medecin@clinique.com', 
+    '$2a$10$e8R5qQW3h4L.OaYqW8/R4.uPq5Yh7GqI7k8Y3e7l5O7S9/mKz2/2i', 
+    'GENERALISTE'
+);

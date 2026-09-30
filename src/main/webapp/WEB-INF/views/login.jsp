@@ -13,6 +13,7 @@
             <p class="erreur">${erreur}</p>
         </c:if>
         <form method="post" action="${pageContext.request.contextPath}/login">
+            <input type="hidden" name="_csrf" value="${sessionScope.csrfToken}" />
             <input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
 
             <label for="email">E-mail</label>

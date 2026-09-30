@@ -6,7 +6,7 @@ Ce projet est une application web Java EE développée dans le cadre du **Sprint
 L'application est construite selon une **architecture en couches stricte** (Controller, Service, DAO, Entity) afin de faciliter la migration future vers un service de télé-expertise et de garantir la maintenabilité du code.
 
 ## ✨ Fonctionnalités (User Stories)
-- **Authentification :** Login/Logout sécurisé, gestion des rôles (Infirmier, Généraliste), protection CSRF, mots de passe hachés en BCrypt.
+- **Authentification :** Login/Logout  sécurisé, gestion des rôles (Infirmier, Généraliste), protection CSRF, mots de passe hachés en BCrypt.
 - **Module Infirmier (US1 & US2) :**
   - Enregistrement des patients avec identité et signes vitaux (TA, FC, Température, FR).
   - Enregistrement automatique de l'heure d'arrivée.
@@ -29,6 +29,19 @@ Le projet respecte une séparation stricte des responsabilités :
 **Note sur les livrables :**
 - **Livrable 1 :** Implémentation JDBC des DAO (`JdbcUserDAO`, `JdbcPatientDAO`, `JdbcConsultationDAO`).
 - **Livrable 2 :** Migration vers JPA/Hibernate (`JpaUserDAO`, `JpaPatientDAO`, `JpaConsultationDAO`).
+
+### Flux d'accès aux données (Livrable 1)
+
+```mermaid
+flowchart LR
+  Servlet --> Service
+  Service --> DAO[DAO (interface)]
+  DAO --> JdbcDAO[JdbcXxxDAO]
+  JdbcDAO --> DataSource
+  DataSource --> Database[(MySQL / PostgreSQL)]
+```
+
+Pour le Livrable 1, les implémentations `JdbcXxxDAO` exécutent elles-mêmes le SQL via JDBC, avec un `DataSource`, des `PreparedStatement` et la fermeture des ressources avec try-with-resources. JPA/Hibernate n'est pas utilisé dans cette livraison.
 
 ## 🛠️ Stack Technique
 - **Langage :** Java 17+

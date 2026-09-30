@@ -19,9 +19,13 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import javax.sql.DataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Implémentation JDBC de l'accès aux données des consultations. */
 public class JdbcConsultationDAO implements ConsultationDAO {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(JdbcConsultationDAO.class);
 
     private static final String INSERT_SQL = "INSERT INTO consultation "
             + "(patient_id, medecin_id, motif, observations, diagnostic, traitement, cout, statut, date_consultation) "
@@ -61,6 +65,7 @@ public class JdbcConsultationDAO implements ConsultationDAO {
             }
             return consultation;
         } catch (SQLException exception) {
+            LOGGER.error("Échec de l'enregistrement de la consultation", exception);
             throw new RuntimeException("Erreur lors de l'enregistrement de la consultation", exception);
         }
     }
@@ -74,6 +79,7 @@ public class JdbcConsultationDAO implements ConsultationDAO {
                 return resultSet.next() ? Optional.of(mapRow(resultSet)) : Optional.empty();
             }
         } catch (SQLException exception) {
+            LOGGER.error("Échec de la recherche de la consultation par patient", exception);
             throw new RuntimeException("Erreur lors de la recherche de la consultation par patient", exception);
         }
     }
@@ -89,6 +95,7 @@ public class JdbcConsultationDAO implements ConsultationDAO {
             }
             return consultations;
         } catch (SQLException exception) {
+            LOGGER.error("Échec de la récupération des consultations", exception);
             throw new RuntimeException("Erreur lors de la récupération des consultations", exception);
         }
     }

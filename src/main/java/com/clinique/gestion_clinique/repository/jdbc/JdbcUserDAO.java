@@ -11,9 +11,13 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import javax.sql.DataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Implémentation JDBC de l'accès aux données des utilisateurs. */
 public class JdbcUserDAO implements UtilisateurDAO {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(JdbcUserDAO.class);
 
     private static final String FIND_BY_EMAIL_SQL = "SELECT * FROM utilisateur WHERE email = ?";
     private static final String FIND_BY_ID_SQL = "SELECT * FROM utilisateur WHERE id = ?";
@@ -33,6 +37,7 @@ public class JdbcUserDAO implements UtilisateurDAO {
                 return resultSet.next() ? Optional.of(mapRow(resultSet)) : Optional.empty();
             }
         } catch (SQLException exception) {
+            LOGGER.error("Échec de la recherche de l'utilisateur par e-mail", exception);
             throw new RuntimeException("Erreur lors de la recherche de l'utilisateur par e-mail", exception);
         }
     }
@@ -46,6 +51,7 @@ public class JdbcUserDAO implements UtilisateurDAO {
                 return resultSet.next() ? Optional.of(mapRow(resultSet)) : Optional.empty();
             }
         } catch (SQLException exception) {
+            LOGGER.error("Échec de la recherche de l'utilisateur par identifiant", exception);
             throw new RuntimeException("Erreur lors de la recherche de l'utilisateur par identifiant", exception);
         }
     }

@@ -17,9 +17,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import javax.sql.DataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Implémentation JDBC de l'accès aux données des patients. */
 public class JdbcPatientDAO implements PatientDAO {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(JdbcPatientDAO.class);
 
     private static final String FIND_BY_ID_SQL = "SELECT * FROM patient WHERE id = ?";
     private static final String FIND_ALL_SQL = "SELECT * FROM patient ORDER BY heure_arrivee ASC";
@@ -45,6 +49,7 @@ public class JdbcPatientDAO implements PatientDAO {
                 return resultSet.next() ? Optional.of(mapRow(resultSet)) : Optional.empty();
             }
         } catch (SQLException exception) {
+            LOGGER.error("Échec de la recherche du patient par identifiant", exception);
             throw new RuntimeException("Erreur lors de la recherche du patient par identifiant", exception);
         }
     }
@@ -60,6 +65,7 @@ public class JdbcPatientDAO implements PatientDAO {
             }
             return patients;
         } catch (SQLException exception) {
+            LOGGER.error("Échec de la récupération des patients", exception);
             throw new RuntimeException("Erreur lors de la récupération des patients", exception);
         }
     }
@@ -77,6 +83,7 @@ public class JdbcPatientDAO implements PatientDAO {
             }
             return patients;
         } catch (SQLException exception) {
+            LOGGER.error("Échec de la recherche des patients par date", exception);
             throw new RuntimeException("Erreur lors de la recherche des patients par date", exception);
         }
     }
@@ -112,6 +119,7 @@ public class JdbcPatientDAO implements PatientDAO {
             patient.setHeureArrivee(heureArrivee);
             return patient;
         } catch (SQLException exception) {
+            LOGGER.error("Échec de l'enregistrement du patient", exception);
             throw new RuntimeException("Erreur lors de l'enregistrement du patient", exception);
         }
     }
@@ -128,6 +136,7 @@ public class JdbcPatientDAO implements PatientDAO {
             statement.setLong(6, patient.getId());
             statement.executeUpdate();
         } catch (SQLException exception) {
+            LOGGER.error("Échec de la mise à jour du patient", exception);
             throw new RuntimeException("Erreur lors de la mise à jour du patient", exception);
         }
     }

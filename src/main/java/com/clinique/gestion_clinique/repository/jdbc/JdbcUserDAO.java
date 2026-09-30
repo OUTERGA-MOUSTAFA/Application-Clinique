@@ -14,7 +14,10 @@ import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Implémentation JDBC de l'accès aux données des utilisateurs. */
+/**
+ * Implémentation JDBC de l'accès aux données des utilisateurs.
+ * Le hash du mot de passe est lu tel quel pour vérification par le service d'authentification.
+ */
 public class JdbcUserDAO implements UtilisateurDAO {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JdbcUserDAO.class);
@@ -24,10 +27,21 @@ public class JdbcUserDAO implements UtilisateurDAO {
 
     private final DataSource dataSource;
 
+    /**
+     * Crée un DAO d'utilisateurs utilisant la source de données fournie.
+     *
+     * @param dataSource source de connexions JDBC
+     */
     public JdbcUserDAO(DataSource dataSource) {
         this.dataSource = Objects.requireNonNull(dataSource, "dataSource ne doit pas être null");
     }
 
+    /**
+     * Recherche un utilisateur par adresse e-mail.
+     *
+     * @param email adresse recherchée
+     * @return l'utilisateur trouvé, ou une valeur vide s'il n'existe pas
+     */
     @Override
     public Optional<Utilisateur> findByEmail(String email) {
         try (Connection connection = dataSource.getConnection();
@@ -42,6 +56,12 @@ public class JdbcUserDAO implements UtilisateurDAO {
         }
     }
 
+    /**
+     * Recherche un utilisateur par identifiant.
+     *
+     * @param id identifiant recherché
+     * @return l'utilisateur trouvé, ou une valeur vide s'il n'existe pas
+     */
     @Override
     public Optional<Utilisateur> findById(Long id) {
         try (Connection connection = dataSource.getConnection();
@@ -56,6 +76,14 @@ public class JdbcUserDAO implements UtilisateurDAO {
         }
     }
 
+    /**
+     * Convertit la ligne courante du résultat SQL en entité utilisateur.
+     * Le mot de passe est conservé sous forme de hash et le rôle est converti en enum.
+     *
+     * @param resultSet résultat positionné sur la ligne à mapper
+     * @return l'utilisateur construit à partir des colonnes de la ligne
+     * @throws SQLException si la lecture d'une colonne ou la conversion du rôle échoue
+     */
     private Utilisateur mapRow(ResultSet resultSet) throws SQLException {
         Utilisateur utilisateur = new Utilisateur();
         utilisateur.setId(resultSet.getLong("id"));

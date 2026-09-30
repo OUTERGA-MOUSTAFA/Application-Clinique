@@ -30,6 +30,19 @@ Le projet respecte une séparation stricte des responsabilités :
 - **Livrable 1 :** Implémentation JDBC des DAO (`JdbcUserDAO`, `JdbcPatientDAO`, `JdbcConsultationDAO`).
 - **Livrable 2 :** Migration vers JPA/Hibernate (`JpaUserDAO`, `JpaPatientDAO`, `JpaConsultationDAO`).
 
+### Flux d'accès aux données (Livrable 1)
+
+```mermaid
+flowchart LR
+  Servlet --> Service
+  Service --> DAO[DAO (interface)]
+  DAO --> JdbcDAO[JdbcXxxDAO]
+  JdbcDAO --> DataSource
+  DataSource --> Database[(MySQL / PostgreSQL)]
+```
+
+Pour le Livrable 1, les implémentations `JdbcXxxDAO` exécutent elles-mêmes le SQL via JDBC, avec un `DataSource`, des `PreparedStatement` et la fermeture des ressources avec try-with-resources. JPA/Hibernate n'est pas utilisé dans cette livraison.
+
 ## 🛠️ Stack Technique
 - **Langage :** Java 17+
 - **Build :** Maven

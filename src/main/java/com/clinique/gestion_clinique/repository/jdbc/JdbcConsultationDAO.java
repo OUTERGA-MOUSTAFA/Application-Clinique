@@ -22,7 +22,10 @@ import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Implémentation JDBC de l'accès aux données des consultations. */
+/**
+ * Implémentation JDBC de l'accès aux données des consultations.
+ * Les relations vers le patient et le médecin sont représentées par leurs identifiants lors du mapping.
+ */
 public class JdbcConsultationDAO implements ConsultationDAO {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JdbcConsultationDAO.class);
@@ -35,10 +38,21 @@ public class JdbcConsultationDAO implements ConsultationDAO {
 
     private final DataSource dataSource;
 
+    /**
+     * Crée un DAO de consultations utilisant la source de données fournie.
+     *
+     * @param dataSource source de connexions JDBC
+     */
     public JdbcConsultationDAO(DataSource dataSource) {
         this.dataSource = Objects.requireNonNull(dataSource, "dataSource ne doit pas être null");
     }
 
+    /**
+     * Enregistre une consultation et récupère l'identifiant généré.
+     *
+     * @param consultation consultation à enregistrer
+     * @return la consultation avec son identifiant généré
+     */
     @Override
     public Consultation save(Consultation consultation) {
         try (Connection connection = dataSource.getConnection();
@@ -70,6 +84,12 @@ public class JdbcConsultationDAO implements ConsultationDAO {
         }
     }
 
+    /**
+     * Recherche une consultation par identifiant de patient.
+     *
+     * @param patientId identifiant du patient
+     * @return la consultation trouvée, ou une valeur vide si aucune n'existe
+     */
     @Override
     public Optional<Consultation> findByPatient(Long patientId) {
         try (Connection connection = dataSource.getConnection();
@@ -84,6 +104,11 @@ public class JdbcConsultationDAO implements ConsultationDAO {
         }
     }
 
+    /**
+     * Récupère les consultations de la plus récente à la plus ancienne.
+     *
+     * @return la liste des consultations, éventuellement vide
+     */
     @Override
     public List<Consultation> findAll() {
         List<Consultation> consultations = new ArrayList<>();
@@ -100,6 +125,14 @@ public class JdbcConsultationDAO implements ConsultationDAO {
         }
     }
 
+    /**
+     * Convertit la ligne courante du résultat SQL en entité consultation, y compris ses relations par ID.
+     * Le statut stocké en base est converti en valeur de l'enum {@link Statut}.
+     *
+     * @param resultSet résultat positionné sur la ligne à mapper
+     * @return la consultation construite à partir des colonnes de la ligne
+     * @throws SQLException si la lecture d'une colonne ou la conversion du statut échoue
+     */
     private Consultation mapRow(ResultSet resultSet) throws SQLException {
         Consultation consultation = new Consultation();
         consultation.setId(resultSet.getLong("id"));

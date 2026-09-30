@@ -20,7 +20,10 @@ import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Implémentation JDBC de l'accès aux données des patients. */
+/**
+ * Implémentation JDBC de l'accès aux données des patients.
+ * Les requêtes utilisent le {@link DataSource} injecté et ferment leurs ressources JDBC automatiquement.
+ */
 public class JdbcPatientDAO implements PatientDAO {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JdbcPatientDAO.class);
@@ -36,10 +39,21 @@ public class JdbcPatientDAO implements PatientDAO {
 
     private final DataSource dataSource;
 
+    /**
+     * Crée un DAO de patients utilisant la source de données fournie.
+     *
+     * @param dataSource source de connexions JDBC
+     */
     public JdbcPatientDAO(DataSource dataSource) {
         this.dataSource = Objects.requireNonNull(dataSource, "dataSource ne doit pas être null");
     }
 
+    /**
+     * Recherche un patient par son identifiant.
+     *
+     * @param id identifiant du patient
+     * @return le patient trouvé, ou une valeur vide s'il n'existe pas
+     */
     @Override
     public Optional<Patient> findById(Long id) {
         try (Connection connection = dataSource.getConnection();
@@ -54,6 +68,11 @@ public class JdbcPatientDAO implements PatientDAO {
         }
     }
 
+    /**
+     * Récupère les patients triés par heure d'arrivée croissante.
+     *
+     * @return la liste des patients, éventuellement vide
+     */
     @Override
     public List<Patient> findAll() {
         List<Patient> patients = new ArrayList<>();
@@ -70,6 +89,12 @@ public class JdbcPatientDAO implements PatientDAO {
         }
     }
 
+    /**
+     * Recherche les patients arrivés à la date donnée.
+     *
+     * @param date date d'arrivée recherchée
+     * @return la liste des patients arrivés ce jour-là, éventuellement vide
+     */
     @Override
     public List<Patient> findByDate(LocalDate date) {
         List<Patient> patients = new ArrayList<>();
@@ -88,6 +113,13 @@ public class JdbcPatientDAO implements PatientDAO {
         }
     }
 
+    /**
+     * Enregistre un patient et récupère l'identifiant généré par la base.
+     * Si aucune heure d'arrivée n'est fournie, l'heure courante est enregistrée.
+     *
+     * @param patient patient à enregistrer
+     * @return le patient avec son identifiant et son heure d'arrivée renseignés
+     */
     @Override
     public Patient save(Patient patient) {
         LocalDateTime heureArrivee = patient.getHeureArrivee() == null
@@ -124,6 +156,11 @@ public class JdbcPatientDAO implements PatientDAO {
         }
     }
 
+    /**
+     * Met à jour les signes vitaux et le statut d'un patient existant.
+     *
+     * @param patient patient portant l'identifiant et les nouvelles valeurs
+     */
     @Override
     public void update(Patient patient) {
         try (Connection connection = dataSource.getConnection();
@@ -141,6 +178,13 @@ public class JdbcPatientDAO implements PatientDAO {
         }
     }
 
+    /**
+     * Convertit la ligne courante du résultat SQL en entité patient.
+     *
+     * @param resultSet résultat positionné sur la ligne à mapper
+     * @return le patient construit à partir des colonnes de la ligne
+     * @throws SQLException si la lecture d'une colonne échoue
+     */
     private Patient mapRow(ResultSet resultSet) throws SQLException {
         Patient patient = new Patient();
         patient.setId(resultSet.getLong("id"));
@@ -165,6 +209,14 @@ public class JdbcPatientDAO implements PatientDAO {
         return patient;
     }
 
+    /**
+     * Affecte un entier nullable à un paramètre JDBC.
+     *
+     * @param statement instruction préparée à compléter
+     * @param index index du paramètre, à partir de 1
+     * @param value valeur entière ou {@code null}
+     * @throws SQLException si l'affectation échoue
+     */
     private void setNullableInteger(PreparedStatement statement, int index, Integer value) throws SQLException {
         if (value == null) {
             statement.setNull(index, Types.INTEGER);

@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Optional;
+import java.util.UUID;
 
 /** Gère l'authentification des utilisateurs de la clinique. */
 @WebServlet("/login")
@@ -37,7 +38,9 @@ public class LoginServlet extends HttpServlet {
 
         Utilisateur utilisateur = resultat.get();
         if (org.mindrot.jbcrypt.BCrypt.checkpw(motDePasse, utilisateur.getMotDePasse())) {
-            request.getSession().setAttribute("utilisateur", utilisateur);
+            jakarta.servlet.http.HttpSession session = request.getSession(); session.setAttribute("utilisateur", utilisateur);
+            String csrfToken = UUID.randomUUID().toString();
+            session.setAttribute("csrfToken", csrfToken);
             String role = utilisateur.getRole().name();
             request.getSession().setAttribute("role", role);
 

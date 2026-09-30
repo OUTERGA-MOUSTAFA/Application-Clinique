@@ -1,28 +1,22 @@
-<%@ page contentType="text/html;charset=UTF-8" %>
-<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <!DOCTYPE html>
-<html lang="fr">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Connexion</title>
+    <title>Page d'authentification - Gestion clinique</title>
 </head>
 <body>
-    <main>
-        <h1>Connexion</h1>
-        <c:if test="${not empty erreur}">
-            <p class="erreur">${erreur}</p>
-        </c:if>
-        <form method="post" action="${pageContext.request.contextPath}/login">
-            <input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
-
-            <label for="email">E-mail</label>
-            <input type="email" id="email" name="email" required>
-
-            <label for="motDePasse">Mot de passe</label>
-            <input type="password" id="motDePasse" name="motDePasse" required>
-
-            <button type="submit">Se connecter</button>
-        </form>
-    </main>
+    <h2>Login</h2>
+    <form action="login" method="post">
+        <!--  CSRF Token -->
+        <input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}"/>
+        
+        <label>Nom: </label>
+        <input type="text" name="username" required/><br/><br/>
+        
+        <label>password: </label>
+        <input type="password" name="password" required/><br/><br/>
+        
+        <button type="submit">Entre</button>
+    </form>
 </body>
 </html>

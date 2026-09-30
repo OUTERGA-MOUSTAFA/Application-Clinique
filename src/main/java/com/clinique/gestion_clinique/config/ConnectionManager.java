@@ -14,6 +14,10 @@ public final class ConnectionManager {
     private ConnectionManager() {
     }
 
+    public static DataSource getDataSource() {
+        return DataSourceHolder.DATA_SOURCE;
+    }
+
     /**
      * Obtient une connexion depuis le DataSource JNDI.
      *

@@ -40,7 +40,8 @@ public class JdbcConsultationDAO implements ConsultationDAO {
 	@Override
 	public Consultation save(Consultation consultation) {
 		try (Connection connection = dataSource.getConnection();
-				PreparedStatement statement = connection.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS)) {
+				PreparedStatement statement = connection.prepareStatement(INSERT_SQL,
+						Statement.RETURN_GENERATED_KEYS)) {
 			statement.setLong(1, consultation.getPatient().getId());
 			statement.setLong(2, consultation.getMedecin().getId());
 			statement.setString(3, consultation.getMotif());

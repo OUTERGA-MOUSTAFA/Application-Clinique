@@ -14,37 +14,31 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
-@WebServlet("/patients")
+@WebServlet("/infirmier/patients")
 public class PatientListServlet extends HttpServlet {
 
-    private PatientService patientService;
+        private PatientService patientService;
 
-    @Override
-    public void init() {
+        @Override
+        public void init() {
 
-        PatientDAO patientDAO =
-                AppConfig.patientDAO();
+                PatientDAO patientDAO = AppConfig.patientDAO();
 
-        patientService =
-                new PatientService(patientDAO);
-    }
+                patientService = new PatientService(patientDAO);
+        }
 
-    @Override
-    protected void doGet(
-            HttpServletRequest request,
-            HttpServletResponse response
-    ) throws ServletException, IOException {
+        @Override
+        protected void doGet(
+                        HttpServletRequest request,
+                        HttpServletResponse response) throws ServletException, IOException {
 
-        List<Patient> patients =
-                patientService.getAllPatients();
+                List<Patient> patients = patientService.patientsDuJour();
 
-        request.setAttribute(
-                "patients",
-                patients
-        );
+                request.setAttribute(
+                                "patients",
+                                patients);
 
-        request.getRequestDispatcher(
-                "/WEB-INF/views/patients/list.jsp"
-        ).forward(request, response);
-    }
+                request.getRequestDispatcher(
+                                "/WEB-INF/views/infirmier/patients.jsp").forward(request, response);
+        }
 }

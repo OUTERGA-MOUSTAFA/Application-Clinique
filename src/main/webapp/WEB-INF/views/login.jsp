@@ -6,12 +6,12 @@
 </head>
 <body>
     <h2>Login</h2>
-    <form action="login" method="post">
+    <form action="${pageContext.request.contextPath}/login" method="post">
         <!--  CSRF Token -->
         <input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}"/>
         
-        <label>Nom: </label>
-        <input type="text" name="username" required/><br/><br/>
+        <label>Email: </label>
+        <input type="email" name="Email" required/><br/><br/>
         
         <label>password: </label>
         <input type="password" name="password" required/><br/><br/>

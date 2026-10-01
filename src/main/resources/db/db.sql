@@ -18,12 +18,13 @@ CREATE TABLE patient (
     nom VARCHAR(100) NOT NULL,
     prenom VARCHAR(100) NOT NULL,
     date_naissance DATE NOT NULL,
-    nss VARCHAR(50) UNIQUE NOT NULL,
-    tension_arterielle VARCHAR(20),
+    num_secu VARCHAR(50),
+    tension VARCHAR(20),
     frequence_cardiaque INT,
-    temperature DECIMAL(4,2),
+    temperature DOUBLE,
     frequence_respiratoire INT,
-    date_arrivee DATETIME NOT NULL
+    heure_arrivee DATETIME NOT NULL,
+    statut VARCHAR(30) NOT NULL
 );
 
 -- 3. Table Consultation

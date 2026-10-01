@@ -9,7 +9,7 @@ import com.clinique.gestion_clinique.repository.PatientDAO;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Optional;
+import java.util.List;
 
 public class ConsultationService {
 
@@ -25,6 +25,17 @@ public class ConsultationService {
         this.patientDAO = patientDAO;
     }
 
+    public List<Patient> patientsEnAttente() {
+
+        return patientDAO.findAll()
+                .stream()
+                .filter(patient -> patient.getId() != null
+                        && consultationDAO
+                                .findByPatient(patient.getId())
+                                .isEmpty())
+                .toList();
+    }
+
     public Consultation cloturer(
             Long patientId,
             Utilisateur medecin,
@@ -33,20 +44,16 @@ public class ConsultationService {
             String diagnostic,
             String traitement) {
 
-        // 1. Vérifier le patient
-        Optional<Patient> patientOptional = patientDAO.findById(patientId);
+        /**
+         * 1. Patient existe ?
+         */
+        Patient patient = patientDAO.findById(patientId)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Patient introuvable."));
 
-        if (patientOptional.isEmpty()) {
-
-            throw new IllegalArgumentException(
-                    "Patient introuvable.");
-        }
-
-        Patient patient = patientOptional.get();
-
-        // 2. Vérifier que le patient n'a pas déjà
-        // une consultation
-
+        /**
+         * 2. Patient déjà consulté ?
+         */
         if (consultationDAO
                 .findByPatient(patientId)
                 .isPresent()) {
@@ -55,9 +62,11 @@ public class ConsultationService {
                     "Ce patient a déjà été consulté.");
         }
 
-        // 3. Validation métier
-
-        if (motif == null || motif.isBlank()) {
+        /**
+         * 3. Validation métier.
+         */
+        if (motif == null ||
+                motif.isBlank()) {
 
             throw new IllegalArgumentException(
                     "Le motif est obligatoire.");
@@ -77,8 +86,9 @@ public class ConsultationService {
                     "Le traitement est obligatoire.");
         }
 
-        // 4. Vérifier le médecin
-
+        /**
+         * 4. Médecin connecté.
+         */
         if (medecin == null ||
                 medecin.getId() == null) {
 
@@ -86,40 +96,47 @@ public class ConsultationService {
                     "Médecin non authentifié.");
         }
 
-        // 5. Création côté SERVEUR
-
+        /**
+         * 5. Construction côté serveur.
+         *
+         * Le client ne peut PAS choisir :
+         * - médecin
+         * - coût
+         * - statut
+         * - date
+         */
         Consultation consultation = new Consultation();
 
         consultation.setPatient(patient);
 
-        // Médecin venant de la SESSION
         consultation.setMedecin(medecin);
 
-        consultation.setMotif(motif);
+        consultation.setMotif(
+                motif.trim());
 
         consultation.setObservations(
-                observations);
+                observations == null
+                        ? null
+                        : observations.trim());
 
         consultation.setDiagnostic(
-                diagnostic);
+                diagnostic.trim());
 
         consultation.setTraitement(
-                traitement);
+                traitement.trim());
 
-        // Règle métier serveur
         consultation.setCout(
                 COUT_FIXE);
 
-        // Règle métier serveur
         consultation.setStatut(
                 Statut.TERMINEE);
 
-        // Règle métier serveur
         consultation.setDateConsultation(
                 LocalDateTime.now());
 
-        // 6. Sauvegarde DB
-
+        /**
+         * 6. Persistence.
+         */
         return consultationDAO.save(
                 consultation);
     }

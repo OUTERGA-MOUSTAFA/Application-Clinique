@@ -1,7 +1,6 @@
 package com.clinique.gestion_clinique.controller.generaliste;
 
 import com.clinique.gestion_clinique.config.AppConfig;
-import com.clinique.gestion_clinique.entity.Consultation;
 import com.clinique.gestion_clinique.entity.Patient;
 import com.clinique.gestion_clinique.entity.Utilisateur;
 import com.clinique.gestion_clinique.repository.ConsultationDAO;
@@ -20,8 +19,7 @@ import java.io.IOException;
 import java.util.Optional;
 
 @WebServlet("/generaliste/consultation")
-public class ConsultationServlet
-        extends HttpServlet {
+public class ConsultationServlet extends HttpServlet {
 
     private PatientService patientService;
     private ConsultationService consultationService;
@@ -35,12 +33,17 @@ public class ConsultationServlet
         ConsultationDAO consultationDAO =
                 AppConfig.consultationDAO();
 
+        /**
+         * PatientService travaille uniquement
+         * avec PatientDAO.
+         */
         patientService =
-                new PatientService(
-                        patientDAO,
-                        consultationDAO
-                );
+                new PatientService(patientDAO);
 
+        /**
+         * ConsultationService travaille avec
+         * ConsultationDAO + PatientDAO.
+         */
         consultationService =
                 new ConsultationService(
                         consultationDAO,
@@ -57,6 +60,9 @@ public class ConsultationServlet
         String patientIdParam =
                 request.getParameter("patientId");
 
+        /**
+         * Vérification du paramètre patientId.
+         */
         if (patientIdParam == null ||
                 patientIdParam.isBlank()) {
 
@@ -74,11 +80,9 @@ public class ConsultationServlet
         try {
 
             patientId =
-                    Long.parseLong(
-                            patientIdParam
-                    );
+                    Long.parseLong(patientIdParam);
 
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException exception) {
 
             response.sendRedirect(
                     request.getContextPath()
@@ -89,6 +93,9 @@ public class ConsultationServlet
             return;
         }
 
+        /**
+         * Recherche du patient.
+         */
         Optional<Patient> patientOptional =
                 patientService.findById(patientId);
 
@@ -106,6 +113,9 @@ public class ConsultationServlet
         Patient patient =
                 patientOptional.get();
 
+        /**
+         * Envoie le patient vers la JSP.
+         */
         request.setAttribute(
                 "patient",
                 patient
@@ -125,6 +135,9 @@ public class ConsultationServlet
             HttpServletResponse response
     ) throws ServletException, IOException {
 
+        /**
+         * 1. Récupérer patientId.
+         */
         String patientIdParam =
                 request.getParameter("patientId");
 
@@ -132,12 +145,16 @@ public class ConsultationServlet
 
         try {
 
-            patientId =
-                    Long.parseLong(
-                            patientIdParam
-                    );
+            if (patientIdParam == null ||
+                    patientIdParam.isBlank()) {
 
-        } catch (Exception e) {
+                throw new NumberFormatException();
+            }
+
+            patientId =
+                    Long.parseLong(patientIdParam);
+
+        } catch (NumberFormatException exception) {
 
             response.sendRedirect(
                     request.getContextPath()
@@ -148,6 +165,9 @@ public class ConsultationServlet
             return;
         }
 
+        /**
+         * 2. Récupérer les données du formulaire.
+         */
         String motif =
                 request.getParameter("motif");
 
@@ -160,6 +180,9 @@ public class ConsultationServlet
         String traitement =
                 request.getParameter("traitement");
 
+        /**
+         * 3. Récupérer la session.
+         */
         HttpSession session =
                 request.getSession(false);
 
@@ -173,6 +196,9 @@ public class ConsultationServlet
             return;
         }
 
+        /**
+         * 4. Récupérer le médecin connecté.
+         */
         Utilisateur medecin =
                 (Utilisateur) session.getAttribute(
                         "utilisateur"
@@ -190,29 +216,49 @@ public class ConsultationServlet
 
         try {
 
-            Consultation consultation =
-                    consultationService.cloturer(
-                            patientId,
-                            medecin,
-                            motif,
-                            observations,
-                            diagnostic,
-                            traitement
-                    );
+            /**
+             * 5. Business logic.
+             *
+             * Le Service décide :
+             * - si le patient existe
+             * - s'il a déjà été consulté
+             * - si les champs sont valides
+             * - médecin connecté
+             * - coût = 150 DH
+             * - statut = TERMINEE
+             */
+            consultationService.cloturer(
+                    patientId,
+                    medecin,
+                    motif,
+                    observations,
+                    diagnostic,
+                    traitement
+            );
 
-            // PRG
+            /**
+             * 6. PRG
+             *
+             * POST → Redirect → GET
+             */
             response.sendRedirect(
                     request.getContextPath()
                             + "/generaliste/patients"
             );
 
-        } catch (IllegalArgumentException |
-                 IllegalStateException e) {
+        } catch (
+                IllegalArgumentException |
+                IllegalStateException exception
+        ) {
 
+            /**
+             * Une erreur métier est arrivée.
+             *
+             * On recharge le patient
+             * pour réafficher le formulaire.
+             */
             Optional<Patient> patientOptional =
-                    patientService.findById(
-                            patientId
-                    );
+                    patientService.findById(patientId);
 
             if (patientOptional.isPresent()) {
 
@@ -222,11 +268,18 @@ public class ConsultationServlet
                 );
             }
 
+            /**
+             * Message d'erreur.
+             */
             request.setAttribute(
                     "error",
-                    e.getMessage()
+                    exception.getMessage()
             );
 
+            /**
+             * Garder les anciennes valeurs
+             * du formulaire.
+             */
             request.setAttribute(
                     "motif",
                     motif
@@ -247,6 +300,9 @@ public class ConsultationServlet
                     traitement
             );
 
+            /**
+             * Retour au formulaire.
+             */
             request.getRequestDispatcher(
                     "/WEB-INF/views/generaliste/consultation-form.jsp"
             ).forward(

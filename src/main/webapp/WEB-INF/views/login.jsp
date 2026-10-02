@@ -1,70 +1,52 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 
-<!DOCTYPE html>
-<html lang="fr">
+    <!DOCTYPE html>
+    <html lang="fr">
 
-<head>
-    <meta charset="UTF-8">
-    <title>Connexion - Clinique</title>
-</head>
+    <head>
+        <meta charset="UTF-8">
+        <title>Connexion</title>
+    </head>
 
-<body>
+    <body>
 
-<h1>Connexion</h1>
+        <h1>Connexion</h1>
 
-<%
-    String erreur = (String) request.getAttribute("erreur");
-%>
+        <% String erreur=(String) request.getAttribute("erreur"); %>
 
-<% if (erreur != null) { %>
-    <p style="color: red;">
-        <%= erreur %>
-    </p>
-<% } %>
+            <% if (erreur !=null) { %>
+                <p style="color:red;">
+                    <%= erreur %>
+                </p>
+                <% } %>
 
-<form method="post"
-      action="${pageContext.request.contextPath}/login">
+                    <form method="post" action="${pageContext.request.contextPath}/login">
 
-    <!-- CSRF -->
-    <input type="hidden"
-           name="_csrf"
-           value="${sessionScope.csrfToken}">
+                        <!-- CSRF -->
+                        <input type="hidden" name="_csrf" value="${sessionScope.csrfToken}">
 
-    <div>
-        <label for="email">
-            Email :
-        </label>
+                        <div>
+                            <label for="email">Email :</label>
 
-        <input
-            type="email"
-            id="email"
-            name="email"
-            required
-        >
-    </div>
+                            <input type="email" id="email" name="email" required>
+                        </div>
 
-    <br>
+                        <br>
 
-    <div>
-        <label for="motDePasse">
-            Mot de passe :
-        </label>
+                        <div>
+                            <label for="motDePasse">Mot de passe :</label>
 
-        <input
-            type="password"
-            id="motDePasse"
-            name="motDePasse"
-            required
-        >
-    </div>
+                            <input type="password" id="motDePasse" name="motDePasse" required>
+                        </div>
 
-    <br>
+                        <br>
 
-    <button type="submit">
-        Se connecter
-    </button>
+                        <button type="submit">
+                            Se connecter
+                        </button>
 
-</form>
+                    </form>
 
-</body>
-</html>
+    </body>
+
+    </html>

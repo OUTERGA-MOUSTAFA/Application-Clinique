@@ -3,16 +3,17 @@ package com.clinique.gestion_clinique.controller;
 import com.clinique.gestion_clinique.config.AppConfig;
 import com.clinique.gestion_clinique.entity.Utilisateur;
 import com.clinique.gestion_clinique.repository.UtilisateurDAO;
-
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.*;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.io.IOException;
 import java.util.Optional;
 import java.util.UUID;
-
-import org.mindrot.jbcrypt.BCrypt;
 
 @WebServlet("/login")
 public class LoginServlet extends HttpServlet {
@@ -29,15 +30,14 @@ public class LoginServlet extends HttpServlet {
                         HttpServletRequest request,
                         HttpServletResponse response) throws ServletException, IOException {
 
-                // Création du token CSRF pour la session
                 HttpSession session = request.getSession();
 
-                if (session.getAttribute("csrfToken") == null) {
-                        session.setAttribute("csrfToken", UUID.randomUUID().toString());
-                }
+                // Création du token CSRF
+                String csrfToken = UUID.randomUUID().toString();
+                session.setAttribute("csrfToken", csrfToken);
 
-                request.getRequestDispatcher("/WEB-INF/views/login.jsp")
-                                .forward(request, response);
+                request.getRequestDispatcher(
+                                "/WEB-INF/views/login.jsp").forward(request, response);
         }
 
         @Override
@@ -48,23 +48,11 @@ public class LoginServlet extends HttpServlet {
                 String email = request.getParameter("email");
                 String motDePasse = request.getParameter("motDePasse");
 
-                if (email == null || email.isBlank()
-                                || motDePasse == null || motDePasse.isBlank()) {
-
-                        request.setAttribute("erreur",
-                                        "Email et mot de passe sont obligatoires.");
-
-                        request.getRequestDispatcher(
-                                        "/WEB-INF/views/login.jsp").forward(request, response);
-
-                        return;
-                }
-
-                Optional<Utilisateur> resultat = utilisateurDAO.findByEmail(email.trim());
+                Optional<Utilisateur> resultat = utilisateurDAO.findByEmail(email);
 
                 if (resultat.isEmpty()) {
-
-                        request.setAttribute("erreur",
+                        request.setAttribute(
+                                        "erreur",
                                         "Identifiants invalides");
 
                         request.getRequestDispatcher(
@@ -75,19 +63,12 @@ public class LoginServlet extends HttpServlet {
 
                 Utilisateur utilisateur = resultat.get();
 
-                boolean passwordCorrect;
+                if (!BCrypt.checkpw(
+                                motDePasse,
+                                utilisateur.getMotDePasse())) {
 
-                try {
-                        passwordCorrect = BCrypt.checkpw(
-                                        motDePasse,
-                                        utilisateur.getMotDePasse());
-                } catch (IllegalArgumentException e) {
-                        passwordCorrect = false;
-                }
-
-                if (!passwordCorrect) {
-
-                        request.setAttribute("erreur",
+                        request.setAttribute(
+                                        "erreur",
                                         "Identifiants invalides");
 
                         request.getRequestDispatcher(
@@ -96,7 +77,6 @@ public class LoginServlet extends HttpServlet {
                         return;
                 }
 
-                // Authentification réussie
                 HttpSession session = request.getSession();
 
                 session.setAttribute("utilisateur", utilisateur);
@@ -104,15 +84,13 @@ public class LoginServlet extends HttpServlet {
                                 "role",
                                 utilisateur.getRole().name());
 
-                // Redirection selon le rôle
-                if (utilisateur.getRole().name().equals("INFIRMIER")) {
+                String role = utilisateur.getRole().name();
 
+                if ("INFIRMIER".equals(role)) {
                         response.sendRedirect(
                                         request.getContextPath()
                                                         + "/infirmier/patients");
-
-                } else if (utilisateur.getRole().name().equals("GENERALISTE")) {
-
+                } else if ("GENERALISTE".equals(role)) {
                         response.sendRedirect(
                                         request.getContextPath()
                                                         + "/generaliste/patients");

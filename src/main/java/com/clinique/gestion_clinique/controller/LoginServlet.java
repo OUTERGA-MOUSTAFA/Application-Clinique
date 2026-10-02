@@ -1,56 +1,121 @@
 package com.clinique.gestion_clinique.controller;
 
+import com.clinique.gestion_clinique.config.AppConfig;
+import com.clinique.gestion_clinique.entity.Utilisateur;
+import com.clinique.gestion_clinique.repository.UtilisateurDAO;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.*;
+
 import java.io.IOException;
 import java.util.Optional;
+import java.util.UUID;
 
-import com.clinique.gestion_clinique.config.ConnectionManager;
-import com.clinique.gestion_clinique.entity.Utilisateur;
-import com.clinique.gestion_clinique.repository.jdbc.JdbcUtilisateurDAO;
+import org.mindrot.jbcrypt.BCrypt;
 
 @WebServlet("/login")
 public class LoginServlet extends HttpServlet {
 
+    private UtilisateurDAO utilisateurDAO;
+
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        // JSP
-        request.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(request, response);
+    public void init() {
+        utilisateurDAO = AppConfig.utilisateurDAO();
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
+    protected void doGet(
+            HttpServletRequest request,
+            HttpServletResponse response) throws ServletException, IOException {
+
+        // Création du token CSRF pour la session
+        HttpSession session = request.getSession();
+
+        if (session.getAttribute("csrfToken") == null) {
+            session.setAttribute("csrfToken", UUID.randomUUID().toString());
+        }
+
+         request.getRequestDispatcher("/WEB-INF/views/login.jsp")
+               .forward(request, response);
+    }
+
+    @Override
+    protected void doPost(
+            HttpServletRequest request,
+            HttpServletResponse response) throws ServletException, IOException {
+
         String email = request.getParameter("email");
         String motDePasse = request.getParameter("motDePasse");
-        JdbcUtilisateurDAO utilisateurDAO = new JdbcUtilisateurDAO(ConnectionManager.getDataSource());
-        Optional<Utilisateur> resultat = utilisateurDAO.findByEmail(email);
+
+        if (email == null || email.isBlank()
+                || motDePasse == null || motDePasse.isBlank()) {
+
+            request.setAttribute("erreur",
+                    "Email et mot de passe sont obligatoires.");
+
+            request.getRequestDispatcher(
+                    "/WEB-INF/views/login.jsp").forward(request, response);
+
+            return;
+        }
+
+        Optional<Utilisateur> resultat = utilisateurDAO.findByEmail(email.trim());
 
         if (resultat.isEmpty()) {
-            request.setAttribute("erreur", "Identifiants invalides");
-            request.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(request, response);
+
+            request.setAttribute("erreur",
+                    "Identifiants invalides");
+
+            request.getRequestDispatcher(
+                    "/WEB-INF/views/login.jsp").forward(request, response);
+
             return;
         }
 
         Utilisateur utilisateur = resultat.get();
-        if (org.mindrot.jbcrypt.BCrypt.checkpw(motDePasse, utilisateur.getMotDePasse())) {
-            request.getSession().setAttribute("utilisateur", utilisateur);
-            String role = utilisateur.getRole().name();
-            request.getSession().setAttribute("role", role);
 
-            if ("INFIRMIER".equals(role)) {
-                response.sendRedirect(request.getContextPath() + "/infirmier/patients");
-            } else {
-                response.sendRedirect(request.getContextPath() + "/generaliste/patients");
-            }
+        boolean passwordCorrect;
+
+        try {
+            passwordCorrect = BCrypt.checkpw(
+                    motDePasse,
+                    utilisateur.getMotDePasse());
+        } catch (IllegalArgumentException e) {
+            passwordCorrect = false;
+        }
+
+        if (!passwordCorrect) {
+
+            request.setAttribute("erreur",
+                    "Identifiants invalides");
+
+            request.getRequestDispatcher(
+                    "/WEB-INF/views/login.jsp").forward(request, response);
+
             return;
         }
 
-        request.setAttribute("erreur", "Identifiants invalides");
-        request.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(request, response);
+        // Authentification réussie
+        HttpSession session = request.getSession();
+
+        session.setAttribute("utilisateur", utilisateur);
+        session.setAttribute(
+                "role",
+                utilisateur.getRole().name());
+
+        // Redirection selon le rôle
+        if (utilisateur.getRole().name().equals("INFIRMIER")) {
+
+            response.sendRedirect(
+                    request.getContextPath()
+                            + "/infirmier/patients");
+
+        } else if (utilisateur.getRole().name().equals("GENERALISTE")) {
+
+            response.sendRedirect(
+                    request.getContextPath()
+                            + "/generaliste/patients");
+        }
     }
 }

@@ -30,17 +30,32 @@ CREATE TABLE patient (
 -- 3. Table Consultation
 CREATE TABLE consultation (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    patient_id BIGINT NOT NULL,
+
+    patient_id BIGINT NOT NULL UNIQUE,
+
     medecin_id BIGINT NOT NULL,
-    motif TEXT,
+
+    motif VARCHAR(255) NOT NULL,
+
     observations TEXT,
-    diagnostic TEXT,
-    traitement TEXT,
-    cout DECIMAL(10,2) NOT NULL DEFAULT 150.00,
-    statut VARCHAR(50) NOT NULL DEFAULT 'TERMINEE',
+
+    diagnostic TEXT NOT NULL,
+
+    traitement TEXT NOT NULL,
+
+    cout DECIMAL(10,2) NOT NULL,
+
+    statut VARCHAR(30) NOT NULL,
+
     date_consultation DATETIME NOT NULL,
-    CONSTRAINT fk_consultation_patient FOREIGN KEY (patient_id) REFERENCES patient(id),
-    CONSTRAINT fk_consultation_medecin FOREIGN KEY (medecin_id) REFERENCES utilisateur(id)
+
+    CONSTRAINT fk_consultation_patient
+        FOREIGN KEY (patient_id)
+        REFERENCES patient(id),
+
+    CONSTRAINT fk_consultation_medecin
+        FOREIGN KEY (medecin_id)
+        REFERENCES utilisateur(id)
 );
 -- entre des comptes par defaut de nurse et doctor
 INSERT INTO utilisateur (nom, email, mot_de_passe, role) 

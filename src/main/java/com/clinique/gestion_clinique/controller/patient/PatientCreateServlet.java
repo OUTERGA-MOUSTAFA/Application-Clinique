@@ -13,8 +13,9 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 
-@WebServlet("/patients/create")
+@WebServlet("/infirmier/patients/nouveau")
 public class PatientCreateServlet extends HttpServlet {
 
     private PatientService patientService;
@@ -22,94 +23,133 @@ public class PatientCreateServlet extends HttpServlet {
     @Override
     public void init() {
 
-        PatientDAO patientDAO =
-                AppConfig.patientDAO();
+        PatientDAO patientDAO = AppConfig.patientDAO();
 
-        patientService =
-                new PatientService(patientDAO);
+        patientService = new PatientService(patientDAO);
     }
 
     @Override
     protected void doGet(
             HttpServletRequest request,
-            HttpServletResponse response
-    ) throws ServletException, IOException {
+            HttpServletResponse response) throws ServletException, IOException {
 
         request.getRequestDispatcher(
-                "/WEB-INF/views/patients/create.jsp"
-        ).forward(request, response);
+                "/WEB-INF/views/infirmier/patient-form.jsp").forward(request, response);
     }
 
     @Override
     protected void doPost(
             HttpServletRequest request,
-            HttpServletResponse response
-    ) throws ServletException, IOException {
+            HttpServletResponse response) throws ServletException, IOException {
 
-        String nom =
-                request.getParameter("nom");
+        String nom = request.getParameter("nom");
+        String prenom = request.getParameter("prenom");
+        String dateNaissanceParam = request.getParameter("dateNaissance");
 
-        String prenom =
-                request.getParameter("prenom");
+        String numSecu = request.getParameter("numSecu");
 
-        String dateNaissance =
-                request.getParameter("dateNaissance");
+        String tension = request.getParameter("tension");
 
-        String numSecu =
-                request.getParameter("numSecu");
+        String frequenceCardiaqueParam = request.getParameter("frequenceCardiaque");
 
-        String tension =
-                request.getParameter("tension");
+        String temperatureParam = request.getParameter("temperature");
 
-        int frequenceCardiaque =
-                Integer.parseInt(
-                        request.getParameter(
-                                "frequenceCardiaque"
-                        )
-                );
+        String frequenceRespiratoireParam = request.getParameter("frequenceRespiratoire");
 
-        double temperature =
-                Double.parseDouble(
-                        request.getParameter(
-                                "temperature"
-                        )
-                );
+        try {
 
-        int frequenceRespiratoire =
-                Integer.parseInt(
-                        request.getParameter(
-                                "frequenceRespiratoire"
-                        )
-                );
+            LocalDate dateNaissance = LocalDate.parse(dateNaissanceParam);
 
-        Patient patient = new Patient();
+            int frequenceCardiaque = Integer.parseInt(frequenceCardiaqueParam);
 
-        patient.setNom(nom);
-        patient.setPrenom(prenom);
+            double temperature = Double.parseDouble(temperatureParam);
 
-        patient.setDateNaissance(
-                LocalDate.parse(dateNaissance)
-        );
+            int frequenceRespiratoire = Integer.parseInt(frequenceRespiratoireParam);
 
-        patient.setNumSecu(numSecu);
-        patient.setTension(tension);
+            Patient patient = patientService.enregistrer(
+                    nom,
+                    prenom,
+                    dateNaissance,
+                    numSecu,
+                    tension,
+                    frequenceCardiaque,
+                    temperature,
+                    frequenceRespiratoire);
 
-        patient.setFrequenceCardiaque(
-                frequenceCardiaque
-        );
+            /**
+             * PRG = Post / Redirect / Get
+             */
+            response.sendRedirect(
+                    request.getContextPath()
+                            + "/infirmier/patients");
 
-        patient.setTemperature(
-                temperature
-        );
+        } catch (DateTimeParseException e) {
 
-        patient.setFrequenceRespiratoire(
-                frequenceRespiratoire
-        );
+            request.setAttribute(
+                    "error",
+                    "Date de naissance invalide.");
 
-        patientService.createPatient(patient);
+            reloadForm(request);
 
-        response.sendRedirect(
-                request.getContextPath() + "/patients"
-        );
+            request.getRequestDispatcher(
+                    "/WEB-INF/views/infirmier/patient-form.jsp").forward(request, response);
+
+        } catch (NumberFormatException e) {
+
+            request.setAttribute(
+                    "error",
+                    "Les valeurs numériques sont invalides.");
+
+            reloadForm(request);
+
+            request.getRequestDispatcher(
+                    "/WEB-INF/views/infirmier/patient-form.jsp").forward(request, response);
+
+        } catch (IllegalArgumentException e) {
+
+            request.setAttribute(
+                    "error",
+                    e.getMessage());
+
+            reloadForm(request);
+
+            request.getRequestDispatcher(
+                    "/WEB-INF/views/infirmier/patient-form.jsp").forward(request, response);
+        }
+    }
+
+    private void reloadForm(HttpServletRequest request) {
+
+        request.setAttribute(
+                "nom",
+                request.getParameter("nom"));
+
+        request.setAttribute(
+                "prenom",
+                request.getParameter("prenom"));
+
+        request.setAttribute(
+                "dateNaissance",
+                request.getParameter("dateNaissance"));
+
+        request.setAttribute(
+                "numSecu",
+                request.getParameter("numSecu"));
+
+        request.setAttribute(
+                "tension",
+                request.getParameter("tension"));
+
+        request.setAttribute(
+                "frequenceCardiaque",
+                request.getParameter("frequenceCardiaque"));
+
+        request.setAttribute(
+                "temperature",
+                request.getParameter("temperature"));
+
+        request.setAttribute(
+                "frequenceRespiratoire",
+                request.getParameter("frequenceRespiratoire"));
     }
 }

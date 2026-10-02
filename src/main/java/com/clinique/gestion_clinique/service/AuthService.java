@@ -1,6 +1,7 @@
 package com.clinique.gestion_clinique.service;
 
-import com.clinique.gestion_clinique.config.DatabaseConfig;
+import com.clinique.gestion_clinique.config.ConnectionManager;
+
 import org.mindrot.jbcrypt.BCrypt;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,7 +14,7 @@ public class AuthService {
         String sql = "SELECT mot_de_passe FROM utilisateur WHERE email = ?";
 
         //لضمان إرجاع الاتصال للـ Pool أوتوماتيكياً
-        try (Connection conn = DatabaseConfig.getConnection();
+        try (Connection conn = ConnectionManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, email);

@@ -16,7 +16,6 @@ CREATE TABLE utilisateur (
 CREATE TABLE patient (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     nom VARCHAR(100) NOT NULL,
-    prenom VARCHAR(100) NOT NULL,
     date_naissance DATE NOT NULL,
     num_secu VARCHAR(50),
     tension VARCHAR(20),

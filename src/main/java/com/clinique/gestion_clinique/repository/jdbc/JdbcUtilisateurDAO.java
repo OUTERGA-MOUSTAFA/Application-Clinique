@@ -18,9 +18,9 @@ public class JdbcUtilisateurDAO implements UtilisateurDAO {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JdbcUtilisateurDAO.class);
 
-    private static final String FIND_BY_EMAIL_SQL = "SELECT id, nom, prenom, email, mot_de_passe, role "
+    private static final String FIND_BY_EMAIL_SQL = "SELECT id, nom, email, mot_de_passe, role "
             + "FROM utilisateur WHERE email = ?";
-    private static final String FIND_BY_ID_SQL = "SELECT id, nom, prenom, email, mot_de_passe, role "
+    private static final String FIND_BY_ID_SQL = "SELECT id, nom, email, mot_de_passe, role "
             + "FROM utilisateur WHERE id = ?";
 
     private final DataSource dataSource;

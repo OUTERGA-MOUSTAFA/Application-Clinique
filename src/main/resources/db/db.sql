@@ -1,4 +1,5 @@
 -- Suppression des tables si elles existent (pour éviter les erreurs)
+USE gestion_clinique;
 DROP TABLE IF EXISTS consultation;
 DROP TABLE IF EXISTS patient;
 DROP TABLE IF EXISTS utilisateur;
@@ -64,15 +65,15 @@ INSERT INTO utilisateur
 VALUES
 (
     'Infirmier',
-    'Test',
+    'Haja',
     'infirmier@clinique.com',
-    '$2a$10$e8R5qQW3h4L.OaYqW8/R4.uPq5Yh7GqI7k8Y3e7l5O7S9/mKz2/2i',
+    '$2a$10$QEzAaltlCIW3voimIhBDiu9UEPU8982IMmN4fDQ/9z2ziCnKnSY7y',
     'INFIRMIER'
 ),
 (
     'Medecin',
-    'Test',
+    'Ahmed',
     'medecin@clinique.com',
-    '$2a$10$e8R5qQW3h4L.OaYqW8/R4.uPq5Yh7GqI7k8Y3e7l5O7S9/mKz2/2i',
+    '$2a$10$QEzAaltlCIW3voimIhBDiu9UEPU8982IMmN4fDQ/9z2ziCnKnSY7y',
     'GENERALISTE'
 );

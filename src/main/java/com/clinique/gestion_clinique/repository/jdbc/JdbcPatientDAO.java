@@ -2,160 +2,376 @@ package com.clinique.gestion_clinique.repository.jdbc;
 
 import com.clinique.gestion_clinique.entity.Patient;
 import com.clinique.gestion_clinique.repository.PatientDAO;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
+
+import javax.sql.DataSource;
+
+import java.sql.*;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import javax.sql.DataSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-/** Implémentation JDBC de l'accès aux données des patients. */
 public class JdbcPatientDAO implements PatientDAO {
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(JdbcPatientDAO.class);
-
-	private static final String FIND_BY_ID_SQL = "SELECT * FROM patient WHERE id = ?";
-	private static final String FIND_ALL_SQL = "SELECT * FROM patient ORDER BY heure_arrivee ASC";
-	private static final String FIND_BY_DATE_SQL = "SELECT * FROM patient WHERE DATE(heure_arrivee) = ?";
-	private static final String INSERT_SQL = "INSERT INTO patient "
-			+ "(nom, prenom, date_naissance, num_secu, tension, frequence_cardiaque, temperature, "
-			+ "frequence_respiratoire, heure_arrivee, statut) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-	private static final String UPDATE_SQL = "UPDATE patient SET tension = ?, frequence_cardiaque = ?, "
-			+ "temperature = ?, frequence_respiratoire = ?, statut = ? WHERE id = ?";
 
 	private final DataSource dataSource;
 
 	public JdbcPatientDAO(DataSource dataSource) {
-		this.dataSource = Objects.requireNonNull(dataSource, "dataSource ne doit pas être null");
+		this.dataSource = dataSource;
 	}
 
 	@Override
 	public Optional<Patient> findById(Long id) {
-		try (Connection connection = dataSource.getConnection();
-				PreparedStatement statement = connection.prepareStatement(FIND_BY_ID_SQL)) {
+
+		String sql = """
+				SELECT
+				    id,
+				    nom,
+				    prenom,
+				    date_naissance,
+				    num_secu,
+				    tension,
+				    frequence_cardiaque,
+				    temperature,
+				    frequence_respiratoire,
+				    heure_arrivee,
+				    statut
+				FROM patient
+				WHERE id = ?
+				""";
+
+		try (
+				Connection connection = dataSource.getConnection();
+
+				PreparedStatement statement = connection.prepareStatement(sql)) {
+
 			statement.setLong(1, id);
+
 			try (ResultSet resultSet = statement.executeQuery()) {
-				return resultSet.next() ? Optional.of(mapRow(resultSet)) : Optional.empty();
+
+				if (resultSet.next()) {
+
+					return Optional.of(
+							mapRow(resultSet));
+				}
+
 			}
-		} catch (SQLException exception) {
-			LOGGER.error("Échec de la recherche du patient par identifiant", exception);
-			throw new RuntimeException("Erreur lors de la recherche du patient par identifiant", exception);
+
+		} catch (SQLException e) {
+
+			throw new RuntimeException(
+					"Erreur lors de la recherche du patient.",
+					e);
 		}
+
+		return Optional.empty();
 	}
 
 	@Override
 	public List<Patient> findAll() {
+
+		String sql = """
+				SELECT
+				    id,
+				    nom,
+				    prenom,
+				    date_naissance,
+				    num_secu,
+				    tension,
+				    frequence_cardiaque,
+				    temperature,
+				    frequence_respiratoire,
+				    heure_arrivee,
+				    statut
+				FROM patient
+				ORDER BY heure_arrivee ASC
+				""";
+
 		List<Patient> patients = new ArrayList<>();
-		try (Connection connection = dataSource.getConnection();
-				PreparedStatement statement = connection.prepareStatement(FIND_ALL_SQL);
+
+		try (
+				Connection connection = dataSource.getConnection();
+
+				PreparedStatement statement = connection.prepareStatement(sql);
+
 				ResultSet resultSet = statement.executeQuery()) {
+
 			while (resultSet.next()) {
-				patients.add(mapRow(resultSet));
+
+				patients.add(
+						mapRow(resultSet));
 			}
-			return patients;
-		} catch (SQLException exception) {
-			LOGGER.error("Échec de la récupération des patients", exception);
-			throw new RuntimeException("Erreur lors de la récupération des patients", exception);
+
+		} catch (SQLException e) {
+
+			throw new RuntimeException(
+					"Erreur lors de la récupération des patients.",
+					e);
 		}
+
+		return patients;
 	}
 
 	@Override
 	public List<Patient> findByDate(LocalDate date) {
+
+		String sql = """
+				SELECT
+				    id,
+				    nom,
+				    prenom,
+				    date_naissance,
+				    num_secu,
+				    tension,
+				    frequence_cardiaque,
+				    temperature,
+				    frequence_respiratoire,
+				    heure_arrivee,
+				    statut
+				FROM patient
+				WHERE DATE(heure_arrivee) = ?
+				ORDER BY heure_arrivee ASC
+				""";
+
 		List<Patient> patients = new ArrayList<>();
-		try (Connection connection = dataSource.getConnection();
-				PreparedStatement statement = connection.prepareStatement(FIND_BY_DATE_SQL)) {
-			statement.setDate(1, java.sql.Date.valueOf(date));
+
+		try (
+				Connection connection = dataSource.getConnection();
+
+				PreparedStatement statement = connection.prepareStatement(sql)) {
+
+			statement.setDate(
+					1,
+					Date.valueOf(date));
+
 			try (ResultSet resultSet = statement.executeQuery()) {
+
 				while (resultSet.next()) {
-					patients.add(mapRow(resultSet));
+
+					patients.add(
+							mapRow(resultSet));
 				}
 			}
-			return patients;
-		} catch (SQLException exception) {
-			LOGGER.error("Échec de la recherche des patients par date", exception);
-			throw new RuntimeException("Erreur lors de la recherche des patients par date", exception);
+
+		} catch (SQLException e) {
+
+			throw new RuntimeException(
+					"Erreur lors de la recherche par date.",
+					e);
 		}
+
+		return patients;
 	}
 
 	@Override
 	public Patient save(Patient patient) {
-		LocalDateTime heureArrivee = patient.getHeureArrivee() == null
-				? LocalDateTime.now()
-				: patient.getHeureArrivee();
-		try (Connection connection = dataSource.getConnection();
-				PreparedStatement statement = connection.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS)) {
-			statement.setString(1, patient.getNom());
-			statement.setString(2, patient.getPrenom());
-			LocalDate dateNaissance = patient.getDateNaissance();
-			statement.setDate(3, dateNaissance == null ? null : java.sql.Date.valueOf(dateNaissance));
-			statement.setString(4, patient.getNumSecu());
-			statement.setString(5, patient.getTension());
-			statement.setInt(6, patient.getFrequenceCardiaque());
-			statement.setDouble(7, patient.getTemperature());
-			statement.setInt(8, patient.getFrequenceRespiratoire());
-			statement.setTimestamp(9, Timestamp.valueOf(heureArrivee));
-			statement.setString(10, patient.getStatut());
 
-			if (statement.executeUpdate() == 0) {
-				throw new SQLException("L'insertion du patient a échoué");
-			}
-			try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
-				if (!generatedKeys.next()) {
-					throw new SQLException("Aucun identifiant généré pour le patient");
+		String sql = """
+				INSERT INTO patient (
+				    nom,
+				    prenom,
+				    date_naissance,
+				    num_secu,
+				    tension,
+				    frequence_cardiaque,
+				    temperature,
+				    frequence_respiratoire,
+				    heure_arrivee,
+				    statut
+				)
+				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+				""";
+
+		try (
+				Connection connection = dataSource.getConnection();
+
+				PreparedStatement statement = connection.prepareStatement(
+						sql,
+						Statement.RETURN_GENERATED_KEYS)) {
+
+			statement.setString(
+					1,
+					patient.getNom());
+
+			statement.setString(
+					2,
+					patient.getPrenom());
+
+			statement.setDate(
+					3,
+					Date.valueOf(
+							patient.getDateNaissance()));
+
+			statement.setString(
+					4,
+					patient.getNumSecu());
+
+			statement.setString(
+					5,
+					patient.getTension());
+
+			statement.setInt(
+					6,
+					patient.getFrequenceCardiaque());
+
+			statement.setDouble(
+					7,
+					patient.getTemperature());
+
+			statement.setInt(
+					8,
+					patient.getFrequenceRespiratoire());
+
+			statement.setTimestamp(
+					9,
+					Timestamp.valueOf(
+							patient.getHeureArrivee()));
+
+			statement.setString(
+					10,
+					patient.getStatut());
+
+			statement.executeUpdate();
+
+			try (
+					ResultSet keys = statement.getGeneratedKeys()) {
+
+				if (keys.next()) {
+
+					patient.setId(
+							keys.getLong(1));
 				}
-				patient.setId(generatedKeys.getLong(1));
 			}
-			patient.setHeureArrivee(heureArrivee);
+
 			return patient;
-		} catch (SQLException exception) {
-			LOGGER.error("Échec de l'enregistrement du patient", exception);
-			throw new RuntimeException("Erreur lors de l'enregistrement du patient", exception);
+
+		} catch (SQLException e) {
+
+			throw new RuntimeException(
+					"Erreur lors de l'enregistrement du patient.",
+					e);
 		}
 	}
 
 	@Override
 	public void update(Patient patient) {
-		try (Connection connection = dataSource.getConnection();
-				PreparedStatement statement = connection.prepareStatement(UPDATE_SQL)) {
-			statement.setString(1, patient.getTension());
-			statement.setInt(2, patient.getFrequenceCardiaque());
-			statement.setDouble(3, patient.getTemperature());
-			statement.setInt(4, patient.getFrequenceRespiratoire());
-			statement.setString(5, patient.getStatut());
-			statement.setLong(6, patient.getId());
+
+		String sql = """
+				UPDATE patient
+				SET nom = ?,
+				    prenom = ?,
+				    date_naissance = ?,
+				    num_secu = ?,
+				    tension = ?,
+				    frequence_cardiaque = ?,
+				    temperature = ?,
+				    frequence_respiratoire = ?,
+				    heure_arrivee = ?,
+				    statut = ?
+				WHERE id = ?
+				""";
+
+		try (
+				Connection connection = dataSource.getConnection();
+
+				PreparedStatement statement = connection.prepareStatement(sql)) {
+
+			statement.setString(1, patient.getNom());
+			statement.setString(2, patient.getPrenom());
+
+			statement.setDate(
+					3,
+					Date.valueOf(
+							patient.getDateNaissance()));
+
+			statement.setString(4, patient.getNumSecu());
+			statement.setString(5, patient.getTension());
+			statement.setInt(
+					6,
+					patient.getFrequenceCardiaque());
+
+			statement.setDouble(
+					7,
+					patient.getTemperature());
+
+			statement.setInt(
+					8,
+					patient.getFrequenceRespiratoire());
+
+			statement.setTimestamp(
+					9,
+					Timestamp.valueOf(
+							patient.getHeureArrivee()));
+
+			statement.setString(
+					10,
+					patient.getStatut());
+
+			statement.setLong(
+					11,
+					patient.getId());
+
 			statement.executeUpdate();
-		} catch (SQLException exception) {
-			LOGGER.error("Échec de la mise à jour du patient", exception);
-			throw new RuntimeException("Erreur lors de la mise à jour du patient", exception);
+
+		} catch (SQLException e) {
+
+			throw new RuntimeException(
+					"Erreur lors de la mise à jour du patient.",
+					e);
 		}
 	}
 
-	private Patient mapRow(ResultSet resultSet) throws SQLException {
+	private Patient mapRow(ResultSet resultSet)
+			throws SQLException {
+
 		Patient patient = new Patient();
-		patient.setId(resultSet.getLong("id"));
-		patient.setNom(resultSet.getString("nom"));
-		patient.setPrenom(resultSet.getString("prenom"));
 
-		java.sql.Date dateNaissance = resultSet.getDate("date_naissance");
-		patient.setDateNaissance(dateNaissance == null ? null : dateNaissance.toLocalDate());
-		patient.setNumSecu(resultSet.getString("num_secu"));
-		patient.setTension(resultSet.getString("tension"));
-		patient.setFrequenceCardiaque(resultSet.getInt("frequence_cardiaque"));
-		patient.setTemperature(resultSet.getDouble("temperature"));
-		patient.setFrequenceRespiratoire(resultSet.getInt("frequence_respiratoire"));
+		patient.setId(
+				resultSet.getLong("id"));
 
-		Timestamp heureArrivee = resultSet.getTimestamp("heure_arrivee");
-		patient.setHeureArrivee(heureArrivee == null ? null : heureArrivee.toLocalDateTime());
-		patient.setStatut(resultSet.getString("statut"));
+		patient.setNom(
+				resultSet.getString("nom"));
+
+		patient.setPrenom(
+				resultSet.getString("prenom"));
+
+		Date dateNaissance = resultSet.getDate("date_naissance");
+
+		if (dateNaissance != null) {
+
+			patient.setDateNaissance(
+					dateNaissance.toLocalDate());
+		}
+
+		patient.setNumSecu(
+				resultSet.getString("num_secu"));
+
+		patient.setTension(
+				resultSet.getString("tension"));
+
+		patient.setFrequenceCardiaque(
+				resultSet.getInt(
+						"frequence_cardiaque"));
+
+		patient.setTemperature(
+				resultSet.getDouble(
+						"temperature"));
+
+		patient.setFrequenceRespiratoire(
+				resultSet.getInt(
+						"frequence_respiratoire"));
+
+		Timestamp heureArrivee = resultSet.getTimestamp(
+				"heure_arrivee");
+
+		if (heureArrivee != null) {
+
+			patient.setHeureArrivee(
+					heureArrivee.toLocalDateTime());
+		}
+
+		patient.setStatut(
+				resultSet.getString("statut"));
+
 		return patient;
 	}
 }

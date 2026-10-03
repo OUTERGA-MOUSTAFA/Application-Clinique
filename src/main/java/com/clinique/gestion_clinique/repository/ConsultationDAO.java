@@ -1,6 +1,8 @@
 package com.clinique.gestion_clinique.repository;
 
 import com.clinique.gestion_clinique.entity.Consultation;
+import com.clinique.gestion_clinique.entity.Patient;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -15,6 +17,14 @@ public interface ConsultationDAO {
      */
     Consultation save(Consultation c);
 
+
+//     Patient ID = 10
+
+//     Consultation ?
+//        │
+//        ├── oui → Optional<Consultation>
+//        │
+//        └── non → Optional.empty()
     /**
      * Recherche une consultation à partir de l'identifiant de son patient.
      *

@@ -32,9 +32,11 @@ public class LoginServlet extends HttpServlet {
 
                 HttpSession session = request.getSession();
 
-                // Création du token CSRF
-                String csrfToken = UUID.randomUUID().toString();
-                session.setAttribute("csrfToken", csrfToken);
+                if (session.getAttribute("csrfToken") == null) {
+                        session.setAttribute(
+                                        "csrfToken",
+                                        UUID.randomUUID().toString());
+                }
 
                 request.getRequestDispatcher(
                                 "/WEB-INF/views/login.jsp").forward(request, response);

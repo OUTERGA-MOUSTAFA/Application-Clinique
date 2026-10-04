@@ -3,8 +3,10 @@ package com.clinique.gestion_clinique.service;
 import com.clinique.gestion_clinique.entity.Patient;
 import com.clinique.gestion_clinique.repository.PatientDAO;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Optional;
 
@@ -110,6 +112,72 @@ public class PatientService {
                                 .equals(today))
                 .sorted((p1, p2) -> p1.getHeureArrivee()
                         .compareTo(p2.getHeureArrivee()))
+                .toList();
+    }
+
+    public List<Patient> filtrerParPeriode(String periode) {
+
+        LocalDate aujourdHui = LocalDate.now();
+
+        LocalDate debut;
+        LocalDate fin;
+
+        switch (periode) {
+
+            case "aujourd-hui":
+
+                debut = aujourdHui;
+                fin = aujourdHui;
+
+                break;
+
+            case "hier":
+
+                debut = aujourdHui.minusDays(1);
+                fin = aujourdHui.minusDays(1);
+
+                break;
+
+            case "semaine":
+
+                debut = aujourdHui.with(
+                        TemporalAdjusters.previousOrSame(
+                                DayOfWeek.MONDAY));
+
+                fin = debut.plusDays(6);
+
+                break;
+
+            case "mois":
+
+                debut = aujourdHui.withDayOfMonth(1);
+
+                fin = aujourdHui.withDayOfMonth(
+                        aujourdHui.lengthOfMonth());
+
+                break;
+
+            default:
+
+                // Par défaut : aujourd'hui
+                debut = aujourdHui;
+                fin = aujourdHui;
+        }
+
+        return patientDAO.findAll()
+                .stream()
+                .filter(patient -> patient.getHeureArrivee() != null)
+                .filter(patient -> {
+
+                    LocalDate dateArrivee = patient.getHeureArrivee()
+                            .toLocalDate();
+
+                    return !dateArrivee.isBefore(debut)
+                            && !dateArrivee.isAfter(fin);
+                })
+                .sorted((p1, p2) -> p1.getHeureArrivee()
+                        .compareTo(
+                                p2.getHeureArrivee()))
                 .toList();
     }
 }

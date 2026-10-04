@@ -14,6 +14,8 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.util.UUID;
+
 
 import java.io.IOException;
 import java.util.Optional;
@@ -21,294 +23,326 @@ import java.util.Optional;
 @WebServlet("/generaliste/consultation")
 public class ConsultationServlet extends HttpServlet {
 
-    private PatientService patientService;
-    private ConsultationService consultationService;
+        private PatientService patientService;
+        private ConsultationService consultationService;
 
-    @Override
-    public void init() {
+        @Override
+        public void init() {
 
-        PatientDAO patientDAO =
-                AppConfig.patientDAO();
+                PatientDAO patientDAO = AppConfig.patientDAO();
 
-        ConsultationDAO consultationDAO =
-                AppConfig.consultationDAO();
+                ConsultationDAO consultationDAO = AppConfig.consultationDAO();
 
-        /**
-         * PatientService travaille uniquement
-         * avec PatientDAO.
-         */
-        patientService =
-                new PatientService(patientDAO);
+                /**
+                 * PatientService travaille uniquement
+                 * avec PatientDAO.
+                 */
+                patientService = new PatientService(patientDAO);
 
-        /**
-         * ConsultationService travaille avec
-         * ConsultationDAO + PatientDAO.
-         */
-        consultationService =
-                new ConsultationService(
-                        consultationDAO,
-                        patientDAO
-                );
-    }
-
-    @Override
-    protected void doGet(
-            HttpServletRequest request,
-            HttpServletResponse response
-    ) throws ServletException, IOException {
-
-        String patientIdParam =
-                request.getParameter("patientId");
-
-        /**
-         * Vérification du paramètre patientId.
-         */
-        if (patientIdParam == null ||
-                patientIdParam.isBlank()) {
-
-            response.sendRedirect(
-                    request.getContextPath()
-                            + "/generaliste/patients"
-                            + "?error=Patient+invalide"
-            );
-
-            return;
+                /**
+                 * ConsultationService travaille avec
+                 * ConsultationDAO + PatientDAO.
+                 */
+                consultationService = new ConsultationService(
+                                consultationDAO,
+                                patientDAO);
         }
 
-        Long patientId;
+        // @Override
+        // protected void doGet(
+        // HttpServletRequest request,
+        // HttpServletResponse response) throws ServletException, IOException {
 
-        try {
+        // String patientIdParam = request.getParameter("patientId");
 
-            patientId =
-                    Long.parseLong(patientIdParam);
+        // /**
+        // * Vérification du paramètre patientId.
+        // */
+        // if (patientIdParam == null ||
+        // patientIdParam.isBlank()) {
 
-        } catch (NumberFormatException exception) {
+        // response.sendRedirect(
+        // request.getContextPath()
+        // + "/generaliste/patients"
+        // + "?error=Patient+invalide");
 
-            response.sendRedirect(
-                    request.getContextPath()
-                            + "/generaliste/patients"
-                            + "?error=Patient+invalide"
-            );
+        // return;
+        // }
 
-            return;
-        }
+        // Long patientId;
 
-        /**
-         * Recherche du patient.
-         */
-        Optional<Patient> patientOptional =
-                patientService.findById(patientId);
+        // try {
 
-        if (patientOptional.isEmpty()) {
+        // patientId = Long.parseLong(patientIdParam);
 
-            response.sendRedirect(
-                    request.getContextPath()
-                            + "/generaliste/patients"
-                            + "?error=Patient+introuvable"
-            );
+        // } catch (NumberFormatException exception) {
 
-            return;
-        }
+        // response.sendRedirect(
+        // request.getContextPath()
+        // + "/generaliste/patients"
+        // + "?error=Patient+invalide");
 
-        Patient patient =
-                patientOptional.get();
+        // return;
+        // }
 
-        /**
-         * Envoie le patient vers la JSP.
-         */
-        request.setAttribute(
-                "patient",
-                patient
-        );
+        // /**
+        // * Recherche du patient.
+        // */
+        // Optional<Patient> patientOptional = patientService.findById(patientId);
 
-        request.getRequestDispatcher(
-                "/WEB-INF/views/generaliste/consultation-form.jsp"
-        ).forward(
-                request,
-                response
-        );
-    }
+        // if (patientOptional.isEmpty()) {
 
-    @Override
-    protected void doPost(
-            HttpServletRequest request,
-            HttpServletResponse response
-    ) throws ServletException, IOException {
+        // response.sendRedirect(
+        // request.getContextPath()
+        // + "/generaliste/patients"
+        // + "?error=Patient+introuvable");
 
-        /**
-         * 1. Récupérer patientId.
-         */
-        String patientIdParam =
-                request.getParameter("patientId");
+        // return;
+        // }
 
-        Long patientId;
+        // Patient patient = patientOptional.get();
 
-        try {
+        // /**
+        // * Envoie le patient vers la JSP.
+        // */
+        // request.setAttribute(
+        // "patient",
+        // patient);
 
-            if (patientIdParam == null ||
-                    patientIdParam.isBlank()) {
+        // request.getRequestDispatcher(
+        // "/WEB-INF/views/generaliste/consultation-form.jsp").forward(
+        // request,
+        // response);
+        // }
 
-                throw new NumberFormatException();
-            }
+        @Override
+        protected void doGet(
+                        HttpServletRequest request,
+                        HttpServletResponse response)
+                        throws ServletException, IOException {
 
-            patientId =
-                    Long.parseLong(patientIdParam);
+                // ==========================================
+                // CSRF TOKEN
+                // ==========================================
 
-        } catch (NumberFormatException exception) {
+                HttpSession session = request.getSession();
 
-            response.sendRedirect(
-                    request.getContextPath()
-                            + "/generaliste/patients"
-                            + "?error=Patient+invalide"
-            );
+                if (session.getAttribute("csrfToken") == null) {
 
-            return;
-        }
+                        session.setAttribute(
+                                        "csrfToken",
+                                        UUID.randomUUID().toString());
+                }
 
-        /**
-         * 2. Récupérer les données du formulaire.
-         */
-        String motif =
-                request.getParameter("motif");
+                // ==========================================
+                // RÉCUPÉRER LE PATIENT
+                // ==========================================
 
-        String observations =
-                request.getParameter("observations");
+                String patientIdParam = request.getParameter("patientId");
 
-        String diagnostic =
-                request.getParameter("diagnostic");
+                if (patientIdParam == null ||
+                                patientIdParam.isBlank()) {
 
-        String traitement =
-                request.getParameter("traitement");
+                        response.sendRedirect(
+                                        request.getContextPath()
+                                                        + "/generaliste/patients"
+                                                        + "?error=Patient+invalide");
 
-        /**
-         * 3. Récupérer la session.
-         */
-        HttpSession session =
-                request.getSession(false);
+                        return;
+                }
 
-        if (session == null) {
+                Long patientId;
 
-            response.sendRedirect(
-                    request.getContextPath()
-                            + "/login"
-            );
+                try {
 
-            return;
-        }
+                        patientId = Long.parseLong(patientIdParam);
 
-        /**
-         * 4. Récupérer le médecin connecté.
-         */
-        Utilisateur medecin =
-                (Utilisateur) session.getAttribute(
-                        "utilisateur"
-                );
+                } catch (NumberFormatException exception) {
 
-        if (medecin == null) {
+                        response.sendRedirect(
+                                        request.getContextPath()
+                                                        + "/generaliste/patients"
+                                                        + "?error=Patient+invalide");
 
-            response.sendRedirect(
-                    request.getContextPath()
-                            + "/login"
-            );
+                        return;
+                }
 
-            return;
-        }
+                Optional<Patient> patientOptional = patientService.findById(patientId);
 
-        try {
+                if (patientOptional.isEmpty()) {
 
-            /**
-             * 5. Business logic.
-             *
-             * Le Service décide :
-             * - si le patient existe
-             * - s'il a déjà été consulté
-             * - si les champs sont valides
-             * - médecin connecté
-             * - coût = 150 DH
-             * - statut = TERMINEE
-             */
-            consultationService.cloturer(
-                    patientId,
-                    medecin,
-                    motif,
-                    observations,
-                    diagnostic,
-                    traitement
-            );
+                        response.sendRedirect(
+                                        request.getContextPath()
+                                                        + "/generaliste/patients"
+                                                        + "?error=Patient+introuvable");
 
-            /**
-             * 6. PRG
-             *
-             * POST → Redirect → GET
-             */
-            response.sendRedirect(
-                    request.getContextPath()
-                            + "/generaliste/patients"
-            );
+                        return;
+                }
 
-        } catch (
-                IllegalArgumentException |
-                IllegalStateException exception
-        ) {
-
-            /**
-             * Une erreur métier est arrivée.
-             *
-             * On recharge le patient
-             * pour réafficher le formulaire.
-             */
-            Optional<Patient> patientOptional =
-                    patientService.findById(patientId);
-
-            if (patientOptional.isPresent()) {
+                Patient patient = patientOptional.get();
 
                 request.setAttribute(
-                        "patient",
-                        patientOptional.get()
-                );
-            }
+                                "patient",
+                                patient);
 
-            /**
-             * Message d'erreur.
-             */
-            request.setAttribute(
-                    "error",
-                    exception.getMessage()
-            );
-
-            /**
-             * Garder les anciennes valeurs
-             * du formulaire.
-             */
-            request.setAttribute(
-                    "motif",
-                    motif
-            );
-
-            request.setAttribute(
-                    "observations",
-                    observations
-            );
-
-            request.setAttribute(
-                    "diagnostic",
-                    diagnostic
-            );
-
-            request.setAttribute(
-                    "traitement",
-                    traitement
-            );
-
-            /**
-             * Retour au formulaire.
-             */
-            request.getRequestDispatcher(
-                    "/WEB-INF/views/generaliste/consultation-form.jsp"
-            ).forward(
-                    request,
-                    response
-            );
+                request.getRequestDispatcher(
+                                "/WEB-INF/views/generaliste/consultation-form.jsp").forward(request, response);
         }
-    }
+
+        @Override
+        protected void doPost(
+                        HttpServletRequest request,
+                        HttpServletResponse response) throws ServletException, IOException {
+
+                /**
+                 * 1. Récupérer patientId.
+                 */
+                String patientIdParam = request.getParameter("patientId");
+
+                Long patientId;
+
+                try {
+
+                        if (patientIdParam == null ||
+                                        patientIdParam.isBlank()) {
+
+                                throw new NumberFormatException();
+                        }
+
+                        patientId = Long.parseLong(patientIdParam);
+
+                } catch (NumberFormatException exception) {
+
+                        response.sendRedirect(
+                                        request.getContextPath()
+                                                        + "/generaliste/patients"
+                                                        + "?error=Patient+invalide");
+
+                        return;
+                }
+
+                /**
+                 * 2. Récupérer les données du formulaire.
+                 */
+                String motif = request.getParameter("motif");
+
+                String observations = request.getParameter("observations");
+
+                String diagnostic = request.getParameter("diagnostic");
+
+                String traitement = request.getParameter("traitement");
+
+                /**
+                 * 3. Récupérer la session.
+                 */
+                HttpSession session = request.getSession(false);
+
+                if (session == null) {
+
+                        response.sendRedirect(
+                                        request.getContextPath()
+                                                        + "/login");
+
+                        return;
+                }
+
+                /**
+                 * 4. Récupérer le médecin connecté.
+                 */
+                Utilisateur medecin = (Utilisateur) session.getAttribute(
+                                "utilisateur");
+
+                if (medecin == null) {
+
+                        response.sendRedirect(
+                                        request.getContextPath()
+                                                        + "/login");
+
+                        return;
+                }
+
+                try {
+
+                        /**
+                         * 5. Business logic.
+                         *
+                         * Le Service décide :
+                         * - si le patient existe
+                         * - s'il a déjà été consulté
+                         * - si les champs sont valides
+                         * - médecin connecté
+                         * - coût = 150 DH
+                         * - statut = TERMINEE
+                         */
+                        consultationService.cloturer(
+                                        patientId,
+                                        medecin,
+                                        motif,
+                                        observations,
+                                        diagnostic,
+                                        traitement);
+
+                        /**
+                         * 6. PRG
+                         *
+                         * POST → Redirect → GET
+                         */
+                        response.sendRedirect(
+                                        request.getContextPath()
+                                                        + "/generaliste/patients");
+
+                } catch (
+                                IllegalArgumentException | IllegalStateException exception) {
+
+                        /**
+                         * Une erreur métier est arrivée.
+                         *
+                         * On recharge le patient
+                         * pour réafficher le formulaire.
+                         */
+                        Optional<Patient> patientOptional = patientService.findById(patientId);
+
+                        if (patientOptional.isPresent()) {
+
+                                request.setAttribute(
+                                                "patient",
+                                                patientOptional.get());
+                        }
+
+                        /**
+                         * Message d'erreur.
+                         */
+                        request.setAttribute(
+                                        "error",
+                                        exception.getMessage());
+
+                        /**
+                         * Garder les anciennes valeurs
+                         * du formulaire.
+                         */
+                        request.setAttribute(
+                                        "motif",
+                                        motif);
+
+                        request.setAttribute(
+                                        "observations",
+                                        observations);
+
+                        request.setAttribute(
+                                        "diagnostic",
+                                        diagnostic);
+
+                        request.setAttribute(
+                                        "traitement",
+                                        traitement);
+
+                        /**
+                         * Retour au formulaire.
+                         */
+                        request.getRequestDispatcher(
+                                        "/WEB-INF/views/generaliste/consultation-form.jsp").forward(
+                                                        request,
+                                                        response);
+                }
+        }
 }

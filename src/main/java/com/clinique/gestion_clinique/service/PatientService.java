@@ -100,19 +100,42 @@ public class PatientService {
         return patientDAO.findById(id);
     }
 
-    public List<Patient> patientsDuJour() {
+    // public List<Patient> patientsDuJour() {
 
-        LocalDate today = LocalDate.now();
+    // LocalDate today = LocalDate.now();
 
-        return patientDAO.findAll()
-                .stream()
-                .filter(patient -> patient.getHeureArrivee() != null
-                        && patient.getHeureArrivee()
-                                .toLocalDate()
-                                .equals(today))
-                .sorted((p1, p2) -> p1.getHeureArrivee()
-                        .compareTo(p2.getHeureArrivee()))
-                .toList();
+    // return patientDAO.findAll()
+    // .stream()
+    // .filter(patient -> patient.getHeureArrivee() != null
+    // && patient.getHeureArrivee()
+    // .toLocalDate()
+    // .equals(today))
+    // .sorted((p1, p2) -> p1.getHeureArrivee()
+    // .compareTo(p2.getHeureArrivee()))
+    // .toList();
+    // }
+
+    public void changerStatut(Long patientId, String statut) {// pour généraliste
+
+        Patient patient = patientDAO.findById(patientId)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Patient introuvable."));
+
+        patient.setStatut(statut);
+
+        patientDAO.update(patient);
+    }
+
+    public void update(Patient patient) {
+
+        if (patient == null ||
+                patient.getId() == null) {
+
+            throw new IllegalArgumentException(
+                    "Patient invalide.");
+        }
+
+        patientDAO.update(patient);
     }
 
     public List<Patient> filtrerParPeriode(String periode) {

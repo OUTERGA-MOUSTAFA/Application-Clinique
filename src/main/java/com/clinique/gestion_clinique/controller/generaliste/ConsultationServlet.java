@@ -16,7 +16,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.util.UUID;
 
-
 import java.io.IOException;
 import java.util.Optional;
 
@@ -179,14 +178,43 @@ public class ConsultationServlet extends HttpServlet {
                         return;
                 }
 
-                Patient patient = patientOptional.get();
+                Patient patient = patientService.findById(patientId)
+                                .orElseThrow(() -> new IllegalArgumentException(
+                                                "Patient introuvable."));
+// 
+                // Patient patient = patientOptional.get();
+
+                // request.setAttribute(
+                // "patient",
+                // patient);
+
+                // request.getRequestDispatcher(
+                // "/WEB-INF/views/generaliste/consultation-form.jsp").forward(request,
+                // response);
+
+                // ======================================
+                // LE PATIENT PASSE EN COURS
+                // ======================================
+
+                if ("EN_ATTENTE".equals(patient.getStatut())) {
+
+                        patient.setStatut("EN_COURS");
+
+                        patientService.update(patient);
+                }
+
+                // ======================================
+                // ENVOYER LE PATIENT À LA JSP
+                // ======================================
 
                 request.setAttribute(
                                 "patient",
                                 patient);
 
                 request.getRequestDispatcher(
-                                "/WEB-INF/views/generaliste/consultation-form.jsp").forward(request, response);
+                                "/WEB-INF/views/generaliste/consultation-form.jsp").forward(
+                                                request,
+                                                response);
         }
 
         @Override

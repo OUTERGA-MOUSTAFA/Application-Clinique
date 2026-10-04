@@ -195,13 +195,13 @@
                             }
 
                             .badge-en-consultation {
-                                background: #bee3f8;
-                                color: #2c5282;
+                                background: #4195c5;
+                                color: #a5ccfb;
                             }
 
                             .badge-termine {
-                                background: #c6f6d5;
-                                color: #22543d;
+                                background: #2bfe6e;
+                                color: #17412d;
                             }
 
                             /* ============================ */

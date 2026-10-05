@@ -216,4 +216,8 @@ public class ConsultationService {
                 return consultationDAO.save(
                                 consultation);
         }
+
+        public List<Patient> patientsParStatut(String statut) {
+                return patientDAO.findByStatut(statut);
+        }
 }

@@ -56,7 +56,7 @@
                     }
 
                     h1::before {
-                        content: "📋";
+                        content: "";
                         font-size: 2rem;
                     }
 
@@ -160,12 +160,12 @@
                         color: #975a16;
                     }
 
-                    .badge-en-consultation {
+                    .badge-en-cours {
                         background: #bee3f8;
                         color: #2c5282;
                     }
 
-                    .badge-termine {
+                    .badge-terminee {
                         background: #c6f6d5;
                         color: #22543d;
                     }
@@ -175,6 +175,13 @@
                         padding: 3rem;
                         color: #718096;
                         font-style: italic;
+                    }
+
+                    .empty-state::before {
+                        content: "🔍";
+                        display: block;
+                        font-size: 3rem;
+                        margin-bottom: 0.75rem;
                     }
 
                     @media (max-width: 768px) {
@@ -205,81 +212,90 @@
             </head>
 
             <body>
-                <div class="container">
-                    <div class="card">
 
-                        <div class="header">
-                            <h1>Liste des patients</h1>
-                            <a class="btn-add" href="${pageContext.request.contextPath}/patients/create">
-                                Ajouter un patient
-                            </a>
-                        </div>
+                <%-- Header de navigation --%>
+                    <%@ include file="/WEB-INF/views/fragments/header.jsp" %>
 
-                        <div class="table-wrapper">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Nom</th>
-                                        <th>Prénom</th>
-                                        <th>Date naissance</th>
-                                        <th>Tension</th>
-                                        <th>Fréq. cardiaque</th>
-                                        <th>Température</th>
-                                        <th>Statut</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <% List<Patient> patients =
-                                        (List<Patient>) request.getAttribute("patients");
+                        <div class="container">
+                            <div class="card">
 
-                                            if (patients == null || patients.isEmpty()) {
-                                            %>
+                                <div class="header">
+                                    <h1>Liste des patients</h1>
+
+                                    <%--  FIX : URL corrigée --%>
+                                        <a class="btn-add"
+                                            href="${pageContext.request.contextPath}/infirmier/patients/nouveau">
+                                            Ajouter un patient
+                                        </a>
+                                </div>
+
+                                <div class="table-wrapper">
+                                    <table>
+                                        <thead>
                                             <tr>
-                                                <td colspan="8" class="empty-state">
-                                                    Aucun patient enregistré pour le moment.
-                                                </td>
+                                                <th>ID</th>
+                                                <th>Nom</th>
+                                                <th>Prénom</th>
+                                                <th>Date naissance</th>
+                                                <th>Tension</th>
+                                                <th>Fréq. cardiaque</th>
+                                                <th>Température</th>
+                                                <th>Statut</th>
                                             </tr>
-                                            <% } else { for (Patient patient : patients) { String
-                                                statut=patient.getStatut(); String badgeClass="badge-en-attente" ; if
-                                                (statut !=null) { String s=statut.toLowerCase(); if
-                                                (s.contains("consultation")) badgeClass="badge-en-consultation" ; else
-                                                if (s.contains("termin")) badgeClass="badge-termine" ; } %>
-                                                <tr>
-                                                    <td>
-                                                        <%= patient.getId() %>
-                                                    </td>
-                                                    <td>
-                                                        <%= patient.getNom() %>
-                                                    </td>
-                                                    <td>
-                                                        <%= patient.getPrenom() %>
-                                                    </td>
-                                                    <td>
-                                                        <%= patient.getDateNaissance() %>
-                                                    </td>
-                                                    <td>
-                                                        <%= patient.getTension() %>
-                                                    </td>
-                                                    <td>
-                                                        <%= patient.getFrequenceCardiaque() %>
-                                                    </td>
-                                                    <td>
-                                                        <%= patient.getTemperature() %>
-                                                    </td>
-                                                    <td>
-                                                        <span class="badge <%= badgeClass %>">
-                                                            <%= patient.getStatut() %>
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                                <% } } %>
-                                </tbody>
-                            </table>
-                        </div>
+                                        </thead>
+                                        <tbody>
+                                            <% List<Patient> patients = (List<Patient>)
+                                                    request.getAttribute("patients");
 
-                    </div>
-                </div>
+                                                    if (patients == null || patients.isEmpty()) {
+                                                    %>
+                                                    <tr>
+                                                        <td colspan="8" class="empty-state">
+                                                            Aucun patient enregistré pour le moment.
+                                                        </td>
+                                                    </tr>
+                                                    <% } else { for (Patient patient : patients) { String
+                                                        statut=patient.getStatut(); String badgeClass="badge-en-attente"
+                                                        ; String statutLabel="En attente" ; /* ✅ FIX : logique selon
+                                                        valeurs réelles (EN_ATTENTE / EN_COURS / TERMINEE) */ if
+                                                        ("EN_COURS".equals(statut)) { badgeClass="badge-en-cours" ;
+                                                        statutLabel="En cours" ; } else if ("TERMINEE".equals(statut)) {
+                                                        badgeClass="badge-terminee" ; statutLabel="Terminée" ; } %>
+                                                        <tr>
+                                                            <td>
+                                                                <%= patient.getId() %>
+                                                            </td>
+                                                            <td>
+                                                                <%= patient.getNom() %>
+                                                            </td>
+                                                            <td>
+                                                                <%= patient.getPrenom() %>
+                                                            </td>
+                                                            <td>
+                                                                <%= patient.getDateNaissance() %>
+                                                            </td>
+                                                            <td>
+                                                                <%= patient.getTension() %>
+                                                            </td>
+                                                            <td>
+                                                                <%= patient.getFrequenceCardiaque() %> bpm
+                                                            </td>
+                                                            <td>
+                                                                <%= patient.getTemperature() %> °C
+                                                            </td>
+                                                            <td>
+                                                                <span class="badge <%= badgeClass %>">
+                                                                    <%= statutLabel %>
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                        <% } } %>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                            </div>
+                        </div>
             </body>
 
             </html>

@@ -39,6 +39,9 @@ public interface PatientDAO {
      */
     Patient save(Patient p);
 
+
+    List<Patient> findByStatut(String statut);
+
     /**
      * Met à jour les données d'un patient existant.
      *

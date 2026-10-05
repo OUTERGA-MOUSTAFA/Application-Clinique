@@ -17,36 +17,87 @@ import java.util.List;
 
 @WebServlet("/generaliste/patients")
 public class GeneralistePatientsServlet
-        extends HttpServlet {
+                extends HttpServlet {
 
-    private ConsultationService consultationService;
+        private ConsultationService consultationService;
 
-    @Override
-    public void init() {
+        @Override
+        public void init() {
 
-        PatientDAO patientDAO = AppConfig.patientDAO();
+                PatientDAO patientDAO = AppConfig.patientDAO();
 
-        ConsultationDAO consultationDAO = AppConfig.consultationDAO();
+                ConsultationDAO consultationDAO = AppConfig.consultationDAO();
 
-        consultationService = new ConsultationService(
-                consultationDAO,
-                patientDAO);
-    }
+                consultationService = new ConsultationService(
+                                consultationDAO,
+                                patientDAO);
+        }
 
-    @Override
-    protected void doGet(
-            HttpServletRequest request,
-            HttpServletResponse response) throws ServletException, IOException {
+        // @Override
+        // protected void doGet(
+        // HttpServletRequest request,
+        // HttpServletResponse response) throws ServletException, IOException {
 
-        List<Patient> patients = consultationService.patientsEnAttente();
+        // List<Patient> patients = consultationService.patientsEnAttente();
 
-        request.setAttribute(
-                "patients",
-                patients);
+        // request.setAttribute(
+        // "patients",
+        // patients);
 
-        request.getRequestDispatcher(
-                "/WEB-INF/views/generaliste/attente.jsp").forward(
-                        request,
-                        response);
-    }
+        // request.getRequestDispatcher(
+        // "/WEB-INF/views/generaliste/attente.jsp").forward(
+        // request,
+        // response);
+        // }
+
+        @Override
+        protected void doGet(
+                        HttpServletRequest request,
+                        HttpServletResponse response) throws ServletException, IOException {
+
+                /**
+                 * ==========================================
+                 * 1. Récupérer le statut demandé
+                 * ==========================================
+                 */
+                String statut = request.getParameter("statut");
+
+                if (statut == null || statut.isBlank()) {
+                        statut = "EN_ATTENTE"; // par défaut
+                }
+
+                /**
+                 * ==========================================
+                 * 2. Filtrer selon le statut
+                 * ==========================================
+                 */
+                List<Patient> patients;
+
+                switch (statut) {
+                        case "EN_COURS":
+                                patients = consultationService.patientsParStatut("EN_COURS");
+                                break;
+                        case "TERMINEE":
+                                patients = consultationService.patientsParStatut("TERMINEE");
+                                break;
+                        case "EN_ATTENTE":
+                        default:
+                                patients = consultationService.patientsParStatut("EN_ATTENTE");
+                                statut = "EN_ATTENTE";
+                                break;
+                }
+
+                /**
+                 * ==========================================
+                 * 3. Envoyer à la JSP
+                 * ==========================================
+                 */
+                request.setAttribute("patients", patients);
+                request.setAttribute("statut", statut);
+
+                request.getRequestDispatcher(
+                                "/WEB-INF/views/generaliste/attente.jsp").forward(
+                                                request,
+                                                response);
+        }
 }

@@ -181,7 +181,7 @@ public class ConsultationServlet extends HttpServlet {
                 Patient patient = patientService.findById(patientId)
                                 .orElseThrow(() -> new IllegalArgumentException(
                                                 "Patient introuvable."));
-// 
+                //
                 // Patient patient = patientOptional.get();
 
                 // request.setAttribute(

@@ -9,345 +9,452 @@
 
             <head>
                 <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <title>Consultation du patient</title>
 
                 <style>
-                    body {
-                        font-family: Arial, sans-serif;
-                        background-color: #f4f6f8;
+                    * {
                         margin: 0;
-                        padding: 30px;
+                        padding: 0;
+                        box-sizing: border-box;
+                    }
+
+                    body {
+                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                        background: #f0f4f8;
+                        color: #2d3748;
+                        padding: 2rem 1rem;
+                        min-height: 100vh;
                     }
 
                     .container {
                         max-width: 900px;
-                        margin: auto;
-                        background: white;
-                        padding: 30px;
-                        border-radius: 10px;
-                        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+                        margin: 0 auto;
+                    }
+
+                    .card {
+                        background: #ffffff;
+                        border-radius: 12px;
+                        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+                        padding: 2rem;
+                        margin-bottom: 1.5rem;
                     }
 
                     h1 {
-                        margin-top: 0;
-                        color: #333;
+                        color: #2c5282;
+                        font-size: 1.8rem;
+                        margin-bottom: 1.5rem;
+                        padding-bottom: 1rem;
+                        border-bottom: 3px solid #4299e1;
+                        display: flex;
+                        align-items: center;
+                        gap: 0.75rem;
+                    }
+
+                    h1::before {
+                        content: "🩺";
+                        font-size: 2rem;
                     }
 
                     h2 {
-                        margin-top: 30px;
-                        color: #444;
-                        border-bottom: 1px solid #ddd;
-                        padding-bottom: 8px;
+                        color: #2c5282;
+                        font-size: 1.2rem;
+                        margin-bottom: 1.25rem;
+                        padding-bottom: 0.5rem;
+                        border-bottom: 2px solid #e2e8f0;
+                        display: flex;
+                        align-items: center;
+                        gap: 0.5rem;
                     }
 
-                    .error {
-                        background-color: #ffe5e5;
-                        color: #b00020;
-                        padding: 12px;
-                        border-radius: 6px;
-                        margin-bottom: 20px;
+                    h2.section-info::before {
+                        content: "👤";
                     }
 
+                    h2.section-vitaux::before {
+                        content: "💓";
+                    }
+
+                    h2.section-consultation::before {
+                        content: "✍️";
+                    }
+
+                    /* Erreur */
+                    .alert-error {
+                        background: #fed7d7;
+                        color: #c53030;
+                        border-left: 4px solid #e53e3e;
+                        padding: 1rem 1.25rem;
+                        border-radius: 8px;
+                        margin-bottom: 1.5rem;
+                        font-weight: 500;
+                        display: flex;
+                        align-items: center;
+                        gap: 0.5rem;
+                    }
+
+                    /* Fiche patient */
                     .patient-info {
                         display: grid;
-                        grid-template-columns: 1fr 1fr;
-                        gap: 15px;
-                        background-color: #f8f9fa;
-                        padding: 20px;
-                        border-radius: 8px;
+                        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                        gap: 1rem;
                     }
 
                     .info-item {
-                        padding: 8px;
+                        background: #f7fafc;
+                        border-left: 3px solid #4299e1;
+                        padding: 0.875rem 1rem;
+                        border-radius: 6px;
                     }
 
-                    .info-item strong {
+                    .info-item .label {
                         display: block;
-                        color: #555;
-                        margin-bottom: 4px;
+                        font-size: 0.75rem;
+                        font-weight: 600;
+                        color: #718096;
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                        margin-bottom: 0.25rem;
                     }
 
+                    .info-item .value {
+                        display: block;
+                        font-size: 1rem;
+                        font-weight: 600;
+                        color: #2d3748;
+                    }
+
+                    /* Signes vitaux mis en avant */
+                    .info-item.vital {
+                        background: #ebf8ff;
+                        border-left-color: #2c5282;
+                    }
+
+                    .info-item.vital .value {
+                        color: #2c5282;
+                        font-size: 1.1rem;
+                    }
+
+                    /* Formulaire */
                     .form-group {
-                        margin-bottom: 20px;
+                        margin-bottom: 1.25rem;
                     }
 
                     label {
                         display: block;
-                        font-weight: bold;
-                        margin-bottom: 7px;
-                        color: #333;
+                        color: #4a5568;
+                        font-size: 0.875rem;
+                        font-weight: 600;
+                        margin-bottom: 0.5rem;
                     }
 
                     input[type="text"],
                     textarea {
                         width: 100%;
-                        box-sizing: border-box;
-                        padding: 10px;
-                        border: 1px solid #ccc;
-                        border-radius: 6px;
-                        font-size: 15px;
-                    }
-
-                    textarea {
-                        min-height: 120px;
+                        padding: 0.75rem 1rem;
+                        border: 2px solid #e2e8f0;
+                        border-radius: 8px;
+                        font-size: 0.95rem;
+                        color: #2d3748;
+                        background: #f7fafc;
+                        transition: all 0.2s ease;
+                        font-family: inherit;
                         resize: vertical;
                     }
 
-                    input[readonly] {
-                        background-color: #eee;
+                    input[type="text"]:focus,
+                    textarea:focus {
+                        outline: none;
+                        border-color: #4299e1;
+                        background: #ffffff;
+                        box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
                     }
 
+                    textarea {
+                        min-height: 110px;
+                        line-height: 1.5;
+                    }
+
+                    /* Coût de la consultation */
                     .cost {
-                        background-color: #eef6ff;
-                        padding: 15px;
-                        border-radius: 6px;
-                        margin: 20px 0;
-                        font-size: 18px;
-                        font-weight: bold;
+                        background: linear-gradient(135deg, #ebf8ff, #bee3f8);
+                        color: #2c5282;
+                        padding: 1rem 1.25rem;
+                        border-radius: 8px;
+                        margin: 1.5rem 0;
+                        font-size: 1.05rem;
+                        font-weight: 700;
+                        display: flex;
+                        align-items: center;
+                        gap: 0.5rem;
                     }
 
+                    .cost::before {
+                        content: "💰";
+                        font-size: 1.3rem;
+                    }
+
+                    /* Actions */
                     .actions {
                         display: flex;
-                        gap: 10px;
-                        margin-top: 25px;
+                        gap: 0.75rem;
+                        margin-top: 1.5rem;
+                        flex-wrap: wrap;
                     }
 
                     .btn {
-                        display: inline-block;
-                        padding: 12px 20px;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 0.5rem;
+                        padding: 0.875rem 1.5rem;
                         border: none;
-                        border-radius: 6px;
+                        border-radius: 8px;
                         cursor: pointer;
                         text-decoration: none;
-                        font-size: 15px;
+                        font-size: 0.95rem;
+                        font-weight: 600;
+                        font-family: inherit;
+                        transition: all 0.2s ease;
+                        letter-spacing: 0.3px;
                     }
 
                     .btn-primary {
-                        background-color: #198754;
-                        color: white;
-                    }
-
-                    .btn-secondary {
-                        background-color: #6c757d;
-                        color: white;
+                        background: linear-gradient(135deg, #2c5282, #4299e1);
+                        color: #ffffff;
+                        flex: 1;
                     }
 
                     .btn-primary:hover {
-                        background-color: #157347;
+                        transform: translateY(-2px);
+                        box-shadow: 0 8px 20px rgba(66, 153, 225, 0.4);
+                    }
+
+                    .btn-primary:active {
+                        transform: translateY(0);
+                    }
+
+                    .btn-secondary {
+                        background: #ffffff;
+                        color: #4a5568;
+                        border: 2px solid #e2e8f0;
                     }
 
                     .btn-secondary:hover {
-                        background-color: #5c636a;
+                        border-color: #cbd5e0;
+                        background: #f7fafc;
+                        color: #2c5282;
+                    }
+
+                    /* Responsive */
+                    @media (max-width: 600px) {
+                        body {
+                            padding: 1rem 0.5rem;
+                        }
+
+                        .card {
+                            padding: 1.25rem;
+                        }
+
+                        h1 {
+                            font-size: 1.4rem;
+                        }
+
+                        .patient-info {
+                            grid-template-columns: 1fr;
+                        }
+
+                        .actions {
+                            flex-direction: column;
+                        }
+
+                        .btn {
+                            width: 100%;
+                        }
                     }
                 </style>
             </head>
 
             <body>
 
-                <div class="container">
+                <%-- Header de navigation (hors du container, en pleine largeur) --%>
+                    <%@ include file="/WEB-INF/views/fragments/header.jsp" %>
 
-                    <h1>Consultation du patient</h1>
+                        <div class="container">
 
-                    <% if (erreur !=null) { %>
-                        <div class="error">
-                            <%= erreur %>
-                        </div>
-                        <% } %>
+                            <div class="card">
+                                <h1>Consultation du patient</h1>
 
-                            <% if (patient==null) { %>
-
-                                <div class="error">
-                                    Patient introuvable.
-                                </div>
-
-                                <a href="<%= request.getContextPath() %>/generaliste/patients"
-                                    class="btn btn-secondary">
-                                    Retour à la liste
-                                </a>
-
-                                <% } else { %>
-
-                                    <!-- ========================= -->
-                                    <!-- INFORMATIONS DU PATIENT -->
-                                    <!-- ========================= -->
-
-                                    <h2>Informations du patient</h2>
-
-                                    <div class="patient-info">
-
-                                        <div class="info-item">
-                                            <strong>Nom</strong>
-                                            <%= patient.getNom() %>
+                                <%-- Message d'erreur --%>
+                                    <% if (erreur !=null) { %>
+                                        <div class="alert-error">⚠️ <%= erreur %>
                                         </div>
+                                        <% } %>
 
-                                        <div class="info-item">
-                                            <strong>Prénom</strong>
-                                            <%= patient.getPrenom() %>
-                                        </div>
+                                            <% if (patient==null) { %>
 
-                                        <div class="info-item">
-                                            <strong>Date de naissance</strong>
-                                            <%= patient.getDateNaissance() %>
-                                        </div>
+                                                <div class="alert-error">⚠️ Patient introuvable.</div>
 
-                                        <div class="info-item">
-                                            <strong>Numéro de sécurité sociale</strong>
-                                            <%= patient.getNumSecu() %>
-                                        </div>
+                                                <a href="<%= request.getContextPath() %>/generaliste/patients"
+                                                    class="btn btn-secondary">
+                                                    ← Retour à la liste
+                                                </a>
 
-                                        <div class="info-item">
-                                            <strong>Heure d'arrivée</strong>
-                                            <%= patient.getHeureArrivee() %>
-                                        </div>
+                                                <% } else { %>
 
-                                        <div class="info-item">
-                                            <strong>Statut</strong>
-                                            <%= patient.getStatut() %>
-                                        </div>
+                                                    <!-- ========================= -->
+                                                    <!-- INFORMATIONS DU PATIENT   -->
+                                                    <!-- ========================= -->
 
-                                    </div>
+                                                    <h2 class="section-info">Informations du patient</h2>
 
+                                                    <div class="patient-info">
+                                                        <div class="info-item">
+                                                            <span class="label">Nom</span>
+                                                            <span class="value">
+                                                                <%= patient.getNom() %>
+                                                            </span>
+                                                        </div>
+                                                        <div class="info-item">
+                                                            <span class="label">Prénom</span>
+                                                            <span class="value">
+                                                                <%= patient.getPrenom() %>
+                                                            </span>
+                                                        </div>
+                                                        <div class="info-item">
+                                                            <span class="label">Date de naissance</span>
+                                                            <span class="value">
+                                                                <%= patient.getDateNaissance() %>
+                                                            </span>
+                                                        </div>
+                                                        <div class="info-item">
+                                                            <span class="label">N° sécurité sociale</span>
+                                                            <span class="value">
+                                                                <%= patient.getNumSecu() %>
+                                                            </span>
+                                                        </div>
+                                                        <div class="info-item">
+                                                            <span class="label">Heure d'arrivée</span>
+                                                            <span class="value">
+                                                                <%= patient.getHeureArrivee() %>
+                                                            </span>
+                                                        </div>
+                                                        <div class="info-item">
+                                                            <span class="label">Statut</span>
+                                                            <span class="value">
+                                                                <%= patient.getStatut() %>
+                                                            </span>
+                                                        </div>
+                                                    </div>
 
-                                    <!-- ========================= -->
-                                    <!-- SIGNES VITAUX -->
-                                    <!-- ========================= -->
+                                                    <!-- ========================= -->
+                                                    <!-- SIGNES VITAUX             -->
+                                                    <!-- ========================= -->
 
-                                    <h2>Signes vitaux</h2>
+                                                    <h2 class="section-vitaux" style="margin-top: 2rem;">Signes vitaux
+                                                    </h2>
 
-                                    <div class="patient-info">
+                                                    <div class="patient-info">
+                                                        <div class="info-item vital">
+                                                            <span class="label">Tension artérielle</span>
+                                                            <span class="value">
+                                                                <%= patient.getTension() %>
+                                                            </span>
+                                                        </div>
+                                                        <div class="info-item vital">
+                                                            <span class="label">Fréquence cardiaque</span>
+                                                            <span class="value">
+                                                                <%= patient.getFrequenceCardiaque() %> bpm
+                                                            </span>
+                                                        </div>
+                                                        <div class="info-item vital">
+                                                            <span class="label">Température</span>
+                                                            <span class="value">
+                                                                <%= patient.getTemperature() %> °C
+                                                            </span>
+                                                        </div>
+                                                        <div class="info-item vital">
+                                                            <span class="label">Fréquence respiratoire</span>
+                                                            <span class="value">
+                                                                <%= patient.getFrequenceRespiratoire() %> /min
+                                                            </span>
+                                                        </div>
+                                                    </div>
 
-                                        <div class="info-item">
-                                            <strong>Tension artérielle</strong>
-                                            <%= patient.getTension() %>
-                                        </div>
+                                                    <% } %>
+                            </div>
 
-                                        <div class="info-item">
-                                            <strong>Fréquence cardiaque</strong>
-                                            <%= patient.getFrequenceCardiaque() %> bpm
-                                        </div>
+                            <% if (patient !=null) { %>
 
-                                        <div class="info-item">
-                                            <strong>Température</strong>
-                                            <%= patient.getTemperature() %> °C
-                                        </div>
+                                <!-- ========================= -->
+                                <!-- FORMULAIRE CONSULTATION   -->
+                                <!-- ========================= -->
 
-                                        <div class="info-item">
-                                            <strong>Fréquence respiratoire</strong>
-                                            <%= patient.getFrequenceRespiratoire() %> /min
-                                        </div>
-
-                                    </div>
-
-
-                                    <!-- ========================= -->
-                                    <!-- FORMULAIRE CONSULTATION -->
-                                    <!-- ========================= -->
-
-                                    <h2>Consultation médicale</h2>
+                                <div class="card">
+                                    <h2 class="section-consultation">Consultation médicale</h2>
 
                                     <form method="post"
-                                        action="<%= request.getContextPath() %>/generaliste/consultation">
+                                        action="${pageContext.request.contextPath}/generaliste/consultation">
 
                                         <!-- ID du patient -->
                                         <input type="hidden" name="patientId" value="${patient.id}">
-
                                         <input type="hidden" name="_csrf" value="${sessionScope.csrfToken}">
 
-
                                         <!-- MOTIF -->
-
                                         <div class="form-group">
-
-                                            <label for="motif">
-                                                Motif de consultation
-                                            </label>
-
+                                            <label for="motif">Motif de consultation</label>
                                             <input type="text" id="motif" name="motif"
                                                 placeholder="Ex : Douleur abdominale, fièvre..."
                                                 value="<%= request.getParameter(" motif") !=null ?
                                                 request.getParameter("motif") : "" %>"
                                             required>
-
                                         </div>
 
-
                                         <!-- OBSERVATIONS -->
-
                                         <div class="form-group">
-
-                                            <label for="observations">
-                                                Observations / Examen clinique
-                                            </label>
-
+                                            <label for="observations">Observations / Examen clinique</label>
                                             <textarea id="observations" name="observations"
                                                 placeholder="Décrire les symptômes et les observations cliniques..."
                                                 required><%= request.getParameter("observations") != null
-                            ? request.getParameter("observations")
-                            : "" %></textarea>
-
+                                                    ? request.getParameter("observations") : "" %></textarea>
                                         </div>
-
 
                                         <!-- DIAGNOSTIC -->
-
                                         <div class="form-group">
-
-                                            <label for="diagnostic">
-                                                Diagnostic
-                                            </label>
-
+                                            <label for="diagnostic">Diagnostic</label>
                                             <textarea id="diagnostic" name="diagnostic"
                                                 placeholder="Saisir le diagnostic..." required><%= request.getParameter("diagnostic") != null
-                            ? request.getParameter("diagnostic")
-                            : "" %></textarea>
-
+                                                    ? request.getParameter("diagnostic") : "" %></textarea>
                                         </div>
-
 
                                         <!-- TRAITEMENT -->
-
                                         <div class="form-group">
-
-                                            <label for="traitement">
-                                                Traitement prescrit
-                                            </label>
-
+                                            <label for="traitement">Traitement prescrit</label>
                                             <textarea id="traitement" name="traitement"
                                                 placeholder="Saisir le traitement prescrit..." required><%= request.getParameter("traitement") != null
-                            ? request.getParameter("traitement")
-                            : "" %></textarea>
-
+                                                    ? request.getParameter("traitement") : "" %></textarea>
                                         </div>
 
-
-                                        <!-- COUT FIXE -->
-
-                                        <div class="cost">
-                                            Coût de la consultation : 150 DH
-                                        </div>
-
+                                        <!-- COÛT -->
+                                        <div class="cost">Coût de la consultation : 150 DH</div>
 
                                         <!-- ACTIONS -->
-
                                         <div class="actions">
-
                                             <button type="submit" class="btn btn-primary">
-                                                Clôturer la consultation
+                                                ✓ Clôturer la consultation
                                             </button>
-
                                             <a href="<%= request.getContextPath() %>/generaliste/patients"
                                                 class="btn btn-secondary">
                                                 Annuler
                                             </a>
-
                                         </div>
 
                                     </form>
+                                </div>
 
-                                    <% } %>
+                                <% } %>
 
-                </div>
-
+                        </div>
             </body>
 
             </html>

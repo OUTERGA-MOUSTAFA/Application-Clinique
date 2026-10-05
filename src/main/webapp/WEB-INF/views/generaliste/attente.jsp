@@ -1,6 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
     <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-
         <!DOCTYPE html>
         <html lang="fr">
 
@@ -45,7 +44,8 @@
                 }
 
                 h1::before {
-                    
+                    content: "⏳";
+                    /* ← FIX : icône ajoutée */
                     font-size: 2rem;
                 }
 
@@ -57,6 +57,9 @@
                     border-radius: 8px;
                     margin-bottom: 1.5rem;
                     font-weight: 500;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
                 }
 
                 .table-wrapper {
@@ -123,7 +126,7 @@
                 .btn-consulter {
                     display: inline-block;
                     padding: 0.5rem 1rem;
-                    background: #4299e1;
+                    background: linear-gradient(135deg, #2c5282, #4299e1);
                     color: #ffffff;
                     text-decoration: none;
                     border-radius: 6px;
@@ -134,9 +137,8 @@
                 }
 
                 .btn-consulter:hover {
-                    background: #2c5282;
                     transform: translateY(-1px);
-                    box-shadow: 0 4px 8px rgba(66, 153, 225, 0.3);
+                    box-shadow: 0 4px 8px rgba(66, 153, 225, 0.35);
                 }
 
                 .empty-state {
@@ -169,64 +171,66 @@
         </head>
 
         <body>
-            <div class="container">
-                <h1>Patients en attente</h1>
 
-                <c:if test="${not empty param.error}">
-                    <div class="alert-error">
-                        ⚠️ ${param.error}
-                    </div>
-                </c:if>
+            <%-- Header de navigation (en pleine largeur) --%>
+                <%@ include file="/WEB-INF/views/fragments/header.jsp" %>
 
-                <div class="table-wrapper">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Nom</th>
-                                <th>Prénom</th>
-                                <th>Date naissance</th>
-                                <th>Tension</th>
-                                <th>Fréq. cardiaque</th>
-                                <th>Température</th>
-                                <th>Fréq. respiratoire</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <c:choose>
-                                <c:when test="${empty patients}">
+                    <div class="container">
+                        <h1>Patients en attente</h1>
+
+                        <c:if test="${not empty param.error}">
+                            <div class="alert-error">⚠️ ${param.error}</div>
+                        </c:if>
+
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
                                     <tr>
-                                        <td colspan="9" class="empty-state">
-                                            Aucun patient en attente pour le moment.
-                                        </td>
+                                        <th>ID</th>
+                                        <th>Nom</th>
+                                        <th>Prénom</th>
+                                        <th>Date naissance</th>
+                                        <th>Tension</th>
+                                        <th>Fréq. cardiaque</th>
+                                        <th>Température</th>
+                                        <th>Fréq. respiratoire</th>
+                                        <th>Action</th>
                                     </tr>
-                                </c:when>
-                                <c:otherwise>
-                                    <c:forEach var="patient" items="${patients}">
-                                        <tr>
-                                            <td>${patient.id}</td>
-                                            <td>${patient.nom}</td>
-                                            <td>${patient.prenom}</td>
-                                            <td>${patient.dateNaissance}</td>
-                                            <td>${patient.tension}</td>
-                                            <td>${patient.frequenceCardiaque}</td>
-                                            <td>${patient.temperature}</td>
-                                            <td>${patient.frequenceRespiratoire}</td>
-                                            <td>
-                                                <a class="btn-consulter"
-                                                    href="${pageContext.request.contextPath}/generaliste/consultation?patientId=${patient.id}">
-                                                    Consulter
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    </c:forEach>
-                                </c:otherwise>
-                            </c:choose>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                                </thead>
+                                <tbody>
+                                    <c:choose>
+                                        <c:when test="${empty patients}">
+                                            <tr>
+                                                <td colspan="9" class="empty-state">
+                                                    Aucun patient en attente pour le moment.
+                                                </td>
+                                            </tr>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <c:forEach var="patient" items="${patients}">
+                                                <tr>
+                                                    <td>${patient.id}</td>
+                                                    <td>${patient.nom}</td>
+                                                    <td>${patient.prenom}</td>
+                                                    <td>${patient.dateNaissance}</td>
+                                                    <td>${patient.tension}</td>
+                                                    <td>${patient.frequenceCardiaque} bpm</td>
+                                                    <td>${patient.temperature} °C</td>
+                                                    <td>${patient.frequenceRespiratoire} /min</td>
+                                                    <td>
+                                                        <a class="btn-consulter"
+                                                            href="${pageContext.request.contextPath}/generaliste/consultation?patientId=${patient.id}">
+                                                            Consulter
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            </c:forEach>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
         </body>
 
         </html>

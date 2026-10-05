@@ -55,6 +55,7 @@ public class JdbcPatientDAO implements PatientDAO {
 				}
 
 			}
+			// f JPA Patient patient = em.find(Patient.class, id);
 
 		} catch (SQLException e) {
 

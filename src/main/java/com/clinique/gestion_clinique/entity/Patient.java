@@ -3,17 +3,34 @@ package com.clinique.gestion_clinique.entity;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity 
+@Table (name = "patient")
 public class Patient {
 
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	private String nom;
 	private String prenom;
+
+	@Column(name = "date_naissance")
 	private LocalDate dateNaissance;
+	 @Column(name = "num_secu")
 	private String numSecu;
 	private String tension;
+	@Column(name = "frequence_cardiaque")
 	private int frequenceCardiaque;
 	private double temperature;
+    @Column(name = "frequence_respiratoire")
 	private int frequenceRespiratoire;
+	@Column(name = "heure_arrivee")
 	private LocalDateTime heureArrivee;
 	private String statut;
 

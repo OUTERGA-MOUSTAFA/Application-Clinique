@@ -374,4 +374,52 @@ public class JdbcPatientDAO implements PatientDAO {
 
 		return patient;
 	}
+
+	@Override
+	public List<Patient> findByStatut(String statut) {
+
+		String sql = """
+				SELECT
+				    id,
+				    nom,
+				    prenom,
+				    date_naissance,
+				    num_secu,
+				    tension,
+				    frequence_cardiaque,
+				    temperature,
+				    frequence_respiratoire,
+				    heure_arrivee,
+				    statut
+				FROM patient
+				WHERE statut = ?
+				ORDER BY heure_arrivee ASC
+				""";
+
+		List<Patient> patients = new ArrayList<>();
+
+		try (
+				Connection connection = dataSource.getConnection();
+
+				PreparedStatement statement = connection.prepareStatement(sql)) {
+
+			statement.setString(1, statut);
+
+			try (ResultSet resultSet = statement.executeQuery()) {
+
+				while (resultSet.next()) {
+
+					patients.add(mapRow(resultSet));
+				}
+			}
+
+		} catch (SQLException e) {
+
+			throw new RuntimeException(
+					"Erreur lors de la recherche par statut.",
+					e);
+		}
+
+		return patients;
+	}
 }

@@ -203,4 +203,8 @@ public class PatientService {
                                 p2.getHeureArrivee()))
                 .toList();
     }
+
+    public List<Patient> findByStatut(String statut) {
+        return patientDAO.findByStatut(statut);
+    }
 }

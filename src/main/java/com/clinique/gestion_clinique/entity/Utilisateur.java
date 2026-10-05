@@ -1,12 +1,28 @@
 package com.clinique.gestion_clinique.entity;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity 
+@Table (name = "utilisateur")
 public class Utilisateur {
 
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	private String nom;
 	private String prenom;
 	private String email;
+	@Column(name = "mot_de_passe")
 	private String motDePasse;
+
+	 @Enumerated(EnumType.STRING) //enregitre INFIRMIER GENERALISTE pas 0|1
 	private Role role;
 
 	public Utilisateur() {

@@ -3,18 +3,43 @@ package com.clinique.gestion_clinique.entity;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "consultation")
 public class Consultation {
 
+	 @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+
+	@ManyToOne
+	@JoinColumn(name = "patient_id", nullable = false)
 	private Patient patient;
+
+	@ManyToOne
+	@JoinColumn(name = "medecin_id", nullable = false)
 	private Utilisateur medecin;
 	private String motif;
 	private String observations;
 	private String diagnostic;
 	private String traitement;
 	private BigDecimal cout;
-	private Statut statut;
-	private LocalDateTime dateConsultation;
+	
+	@Enumerated(EnumType.STRING)
+    private Statut statut;
+
+    @Column(name = "date_consultation")
+    private LocalDateTime dateConsultation;
 
 	public Consultation() {
 	}

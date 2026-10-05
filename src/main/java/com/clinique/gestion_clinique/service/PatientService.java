@@ -3,8 +3,10 @@ package com.clinique.gestion_clinique.service;
 import com.clinique.gestion_clinique.entity.Patient;
 import com.clinique.gestion_clinique.repository.PatientDAO;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Optional;
 
@@ -98,18 +100,107 @@ public class PatientService {
         return patientDAO.findById(id);
     }
 
-    public List<Patient> patientsDuJour() {
+    // public List<Patient> patientsDuJour() {
 
-        LocalDate today = LocalDate.now();
+    // LocalDate today = LocalDate.now();
+
+    // return patientDAO.findAll()
+    // .stream()
+    // .filter(patient -> patient.getHeureArrivee() != null
+    // && patient.getHeureArrivee()
+    // .toLocalDate()
+    // .equals(today))
+    // .sorted((p1, p2) -> p1.getHeureArrivee()
+    // .compareTo(p2.getHeureArrivee()))
+    // .toList();
+    // }
+
+    public void changerStatut(Long patientId, String statut) {// pour généraliste
+
+        Patient patient = patientDAO.findById(patientId)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Patient introuvable."));
+
+        patient.setStatut(statut);
+
+        patientDAO.update(patient);
+    }
+
+    public void update(Patient patient) {
+
+        if (patient == null ||
+                patient.getId() == null) {
+
+            throw new IllegalArgumentException(
+                    "Patient invalide.");
+        }
+
+        patientDAO.update(patient);
+    }
+
+    public List<Patient> filtrerParPeriode(String periode) {
+
+        LocalDate aujourdHui = LocalDate.now();
+
+        LocalDate debut;
+        LocalDate fin;
+
+        switch (periode) {
+
+            case "aujourd-hui":
+
+                debut = aujourdHui;
+                fin = aujourdHui;
+
+                break;
+
+            case "hier":
+
+                debut = aujourdHui.minusDays(1);
+                fin = aujourdHui.minusDays(1);
+
+                break;
+
+            case "semaine":
+
+                debut = aujourdHui.with(
+                        TemporalAdjusters.previousOrSame(
+                                DayOfWeek.MONDAY));
+
+                fin = debut.plusDays(6);
+
+                break;
+
+            case "mois":
+
+                debut = aujourdHui.withDayOfMonth(1);
+
+                fin = aujourdHui.withDayOfMonth(
+                        aujourdHui.lengthOfMonth());
+
+                break;
+
+            default:
+
+                // Par défaut : aujourd'hui
+                debut = aujourdHui;
+                fin = aujourdHui;
+        }
 
         return patientDAO.findAll()
                 .stream()
-                .filter(patient -> patient.getHeureArrivee() != null
-                        && patient.getHeureArrivee()
-                                .toLocalDate()
-                                .equals(today))
+                .filter(patient -> patient.getHeureArrivee() != null)
+                .filter(patient -> {
+
+                    LocalDate dateArrivee = patient.getHeureArrivee()
+                            .toLocalDate();
+
+                    return !dateArrivee.isBefore(debut)
+                            && !dateArrivee.isAfter(fin);
+                })
                 .sorted((p1, p2) -> p1.getHeureArrivee()
-                        .compareTo(p2.getHeureArrivee()))
+                        .compareTo(
+                                p2.getHeureArrivee()))
                 .toList();
     }
 }

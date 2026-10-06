@@ -1,5 +1,10 @@
 package com.clinique.gestion_clinique.api.model;
 
-public class Specialite {
+public enum Specialite {
     
+    CARDIOLOGIE,
+    PNEUMOLOGIE,
+    DERMATOLOGIE,
+    NEUROLOGIE,
+    ENDOCRINOLOGIE
 }

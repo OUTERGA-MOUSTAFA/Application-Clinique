@@ -11,15 +11,15 @@ import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
-@Entity 
-@Table (name = "demandes_expertise")
+@Entity
+@Table(name = "demandes_expertise")
 public class DemandeExpertise {
 
-    @Id 
-    @GeneratedValue (strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column (name = "consultation_id", nullable = false)
+    @Column(name = "consultation_id", nullable = false)
     private Long consultationId;
 
     @Column(name = "specialiste_id", nullable = false)
@@ -28,7 +28,7 @@ public class DemandeExpertise {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String question;
 
-    @Enumerated (EnumType.STRING)
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Priorite priorite;
 
@@ -45,33 +45,84 @@ public class DemandeExpertise {
     @Column(name = "date_creation", nullable = false)
     private LocalDateTime dateCreation;
 
-    public DemandeExpertise() {}
+    public DemandeExpertise() {
+    }
 
-    @PrePersist 
+    @PrePersist
     public void prePersist() {
         this.dateCreation = LocalDateTime.now();
-        if (this.statut == null) {
-            this.statut = StatutDemande.EN_ATTENTE;
-        }
     }
 
     // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public Long getConsultationId() { return consultationId; }
-    public void setConsultationId(Long consultationId) { this.consultationId = consultationId; }
-    public Long getSpecialisteId() { return specialisteId; }
-    public void setSpecialisteId(Long specialisteId) { this.specialisteId = specialisteId; }
-    public String getQuestion() { return question; }
-    public void setQuestion(String question) { this.question = question; }
-    public Priorite getPriorite() { return priorite; }
-    public void setPriorite(Priorite priorite) { this.priorite = priorite; }
-    public StatutDemande getStatut() { return statut; }
-    public void setStatut(StatutDemande statut) { this.statut = statut; }
-    public String getAvis() { return avis; }
-    public void setAvis(String avis) { this.avis = avis; }
-    public String getRecommandations() { return recommandations; }
-    public void setRecommandations(String recommandations) { this.recommandations = recommandations; }
-    public LocalDateTime getDateCreation() { return dateCreation; }
-    public void setDateCreation(LocalDateTime dateCreation) { this.dateCreation = dateCreation; }
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getConsultationId() {
+        return consultationId;
+    }
+
+    public void setConsultationId(Long consultationId) {
+        this.consultationId = consultationId;
+    }
+
+    public Long getSpecialisteId() {
+        return specialisteId;
+    }
+
+    public void setSpecialisteId(Long specialisteId) {
+        this.specialisteId = specialisteId;
+    }
+
+    public String getQuestion() {
+        return question;
+    }
+
+    public void setQuestion(String question) {
+        this.question = question;
+    }
+
+    public Priorite getPriorite() {
+        return priorite;
+    }
+
+    public void setPriorite(Priorite priorite) {
+        this.priorite = priorite;
+    }
+
+    public StatutDemande getStatut() {
+        return statut;
+    }
+
+    public void setStatut(StatutDemande statut) {
+        this.statut = statut;
+    }
+
+    public String getAvis() {
+        return avis;
+    }
+
+    public void setAvis(String avis) {
+        this.avis = avis;
+    }
+
+    public String getRecommandations() {
+        return recommandations;
+    }
+
+    public void setRecommandations(String recommandations) {
+        this.recommandations = recommandations;
+    }
+
+    public LocalDateTime getDateCreation() {
+        return dateCreation;
+    }
+
+    public void setDateCreation(LocalDateTime dateCreation) {
+        this.dateCreation = dateCreation;
+    }
 }

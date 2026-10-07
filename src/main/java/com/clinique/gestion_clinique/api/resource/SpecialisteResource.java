@@ -8,6 +8,6 @@ import jakarta.ws.rs.core.Response;
 @Path ("/specialistes")
 public class SpecialisteResource {
      
-    // @RolesAllowed("GENERALISTE")
+    //@RolesAllowed("GENERALISTE")
     // public Response getSpecialistes() {}
 }

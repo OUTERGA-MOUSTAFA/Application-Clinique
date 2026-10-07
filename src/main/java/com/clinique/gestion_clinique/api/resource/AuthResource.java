@@ -19,16 +19,21 @@ public class AuthResource {
     public Response me() {
 
         return Response.ok(
-                Map.of(
-                        "email",
-                        securityContext.getUserPrincipal().getName(),
+                // Map.of(
+                //         "email",
+                //         securityContext.getUserPrincipal().getName(),
 
-                        "generaliste",
-                        securityContext.isUserInRole("GENERALISTE"),
+                //         "generaliste",
+                //         securityContext.isUserInRole("GENERALISTE"),
 
-                        "specialiste",
-                        securityContext.isUserInRole("SPECIALISTE")
-                )
+                //         "specialiste",
+                //         securityContext.isUserInRole("SPECIALISTE")
+                // )
+
+                "Authenticated user: "
+                + securityContext.getUserPrincipal().getName()
         ).build();
     }
+
+    
 }
